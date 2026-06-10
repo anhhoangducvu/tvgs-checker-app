@@ -1,0 +1,357 @@
+{
+  "_meta": {
+    "name": "Tiêu chí kiểm tra BÁO CÁO HOÀN THÀNH công tác giám sát thi công (Phụ lục IVb - NĐ 06/2021)",
+    "loai_bao_cao": "hoan_thanh",
+    "so_muc": 12,
+    "version": "2.0",
+    "description": "Báo cáo HOÀN THÀNH công tác giám sát thi công xây dựng gói thầu/giai đoạn/hạng mục công trình/công trình — lập khi kết thúc gói thầu, giai đoạn hoặc hạng mục. 12 mục theo Phụ lục IVb. Khác với báo cáo định kỳ (8 mục, Phụ lục IVa).",
+    "created": "2026-06-10",
+    "updated_by": "Hoàng Đức Vũ + Claude (hợp nhất tvgs_chung.json v1.0 + chú thích trong file Phu luc 4 - ND 06-2021.docx)"
+  },
+
+  "cau_truc_muc": {
+    "description": "12 đầu mục bắt buộc theo Phụ lục IVb NĐ 06/2021",
+    "sections": [
+      {"id": 1,  "ten": "Quy mô công trình (mô tả + đánh giá sự phù hợp)"},
+      {"id": 2,  "ten": "Đánh giá sự phù hợp về năng lực của nhà thầu thi công so với hồ sơ dự thầu và hợp đồng"},
+      {"id": 3,  "ten": "Đánh giá khối lượng, tiến độ đã hoàn thành, công tác tổ chức thi công và ATLĐ"},
+      {"id": 4,  "ten": "Đánh giá công tác thí nghiệm, kiểm tra vật liệu, sản phẩm, cấu kiện, thiết bị lắp đặt"},
+      {"id": 5,  "ten": "Đánh giá công tác tổ chức và kết quả kiểm định, quan trắc, thí nghiệm đối chứng (nếu có)"},
+      {"id": 6,  "ten": "Đánh giá công tác tổ chức nghiệm thu công việc xây dựng, nghiệm thu giai đoạn (nếu có)"},
+      {"id": 7,  "ten": "Các thay đổi thiết kế và việc thẩm định, phê duyệt thiết kế điều chỉnh"},
+      {"id": 8,  "ten": "Những tồn tại, khiếm khuyết về chất lượng, sự cố công trình và việc khắc phục"},
+      {"id": 9,  "ten": "Đánh giá sự phù hợp của hồ sơ quản lý chất lượng"},
+      {"id": 10, "ten": "Đánh giá sự tuân thủ pháp luật về môi trường, PCCC và quy định khác"},
+      {"id": 11, "ten": "Đánh giá sự phù hợp của quy trình vận hành, quy trình bảo trì"},
+      {"id": 12, "ten": "Đánh giá về các điều kiện nghiệm thu hoàn thành gói thầu/giai đoạn/hạng mục/công trình"}
+    ]
+  },
+
+  "mo_dau": {
+    "description": "Phần mở đầu: quốc hiệu, số văn bản, kính gửi, căn cứ, đối tượng hoàn thành",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "Kính gửi", "mo_ta": "Kính gửi Chủ đầu tư"},
+      {"pattern": "Số\\s*:|Số\\.", "mo_ta": "Số văn bản báo cáo"},
+      {"pattern": "Hợp đồng", "mo_ta": "Dẫn chiếu hợp đồng TVGS"},
+      {"pattern": "hoàn thành", "mo_ta": "Nêu rõ đối tượng hoàn thành (gói thầu/giai đoạn/hạng mục/công trình)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có nêu rõ ĐỐI TƯỢNG hoàn thành là gì (gói thầu / giai đoạn / hạng mục / công trình) không?",
+      "Có dẫn chiếu hợp đồng TVGS (số, ngày ký) không?",
+      "Có ghi khoảng thời gian thực hiện giám sát không?"
+    ]
+  },
+
+  "muc_1": {
+    "ten": "Quy mô công trình",
+    "sub_sections": ["1a) Mô tả quy mô và công năng", "1b) Đánh giá sự phù hợp"],
+    "chu_thich_goc": "1a: Phải mô tả được quy mô chính và công năng chính: chiều cao tầng, số tầng hầm, số tầng nổi, công năng (văn phòng, bệnh viện, trường học...), thông số kỹ thuật chính (dài, rộng, cao, diện tích sàn, diện tích tầng hầm), bậc chịu lửa. 1b: Đánh giá quy mô + công năng so với 6 đối tượng: (1) GPXD — có không, số bao nhiêu, ngày nào, phù hợp không; (2) thiết kế xây dựng; (3) chỉ dẫn kỹ thuật; (4) biện pháp thi công; (5) biện pháp đảm bảo an toàn; (6) quy chuẩn, tiêu chuẩn áp dụng. Toàn bộ hồ sơ đã được phê duyệt chưa, đúng chức năng/trình tự không.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "Công trình\\s*:", "mo_ta": "Tên công trình"},
+      {"pattern": "Địa điểm", "mo_ta": "Địa điểm xây dựng"},
+      {"pattern": "Cấp công trình|[Cc]ông trình cấp", "mo_ta": "Cấp công trình"},
+      {"pattern": "Diện tích", "mo_ta": "Thông số diện tích"},
+      {"pattern": "tầng hầm|tầng nổi|số tầng|chiều cao", "mo_ta": "Thông số tầng/chiều cao"},
+      {"pattern": "công năng", "mo_ta": "Công năng chủ yếu"},
+      {"pattern": "bậc chịu lửa", "mo_ta": "Bậc chịu lửa"},
+      {"pattern": "Chủ đầu tư", "mo_ta": "Tên Chủ đầu tư"},
+      {"pattern": "thiết kế", "mo_ta": "Đánh giá so với thiết kế xây dựng"},
+      {"pattern": "giấy phép xây dựng|GPXD|miễn.{0,10}phép", "mo_ta": "Đánh giá so với GPXD (hoặc nêu miễn phép)"},
+      {"pattern": "chỉ dẫn kỹ thuật", "mo_ta": "Đánh giá so với chỉ dẫn kỹ thuật"},
+      {"pattern": "biện pháp thi công", "mo_ta": "Đánh giá so với biện pháp thi công"},
+      {"pattern": "quy chuẩn|tiêu chuẩn", "mo_ta": "Đánh giá so với quy chuẩn/tiêu chuẩn"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng nhà thầu thi công", "pattern": "(STT|TT).{0,80}[Nn]hà thầu"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Mục 1a có đủ: số tầng hầm/nổi, chiều cao, diện tích, công năng, bậc chịu lửa không?",
+      "Có nêu rõ công trình CÓ hay KHÔNG có GPXD (số, ngày) hoặc thuộc diện miễn phép không?",
+      "Mục 1b có đánh giá đủ 6 đối tượng: GPXD, thiết kế, chỉ dẫn KT, BPTC, BP an toàn, quy chuẩn/tiêu chuẩn không?",
+      "Có dẫn chiếu số văn bản thẩm định/phê duyệt thiết kế không?",
+      "Mục 1 có liệt kê ĐẦY ĐỦ các hạng mục TEXO giám sát (kể cả hạng mục con) không, và đánh giá có đúng phạm vi TVGS không?"
+    ],
+    "loi_thuong_gap": [
+      "Thiếu bậc chịu lửa",
+      "Chỉ đánh giá so với thiết kế, bỏ sót GPXD/chỉ dẫn KT/quy chuẩn",
+      "Mục 1b chỉ đánh giá 1 hạng mục thay vì toàn bộ phạm vi TVGS"
+    ]
+  },
+
+  "muc_2": {
+    "ten": "Năng lực nhà thầu thi công",
+    "chu_thich_goc": "Đánh giá so với hồ sơ dự thầu VÀ hợp đồng xây dựng. Phải thể hiện: hồ sơ dự thầu đã duyệt chưa, hợp đồng có đóng dấu/đủ pháp lý không, quy định năng lực trong đó thế nào, có phù hợp với hồ sơ năng lực hiện tại của nhà thầu ở dự án không. PHẢI CÓ KẾT LUẬN CỤ THỂ: so với hồ sơ dự thầu và hợp đồng, năng lực nhà thầu (con người, máy móc, thiết bị) PHÙ HỢP hay KHÔNG PHÙ HỢP.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "năng lực", "mo_ta": "Đánh giá năng lực nhà thầu"},
+      {"pattern": "hồ sơ dự thầu|dự thầu", "mo_ta": "Đối chiếu hồ sơ dự thầu"},
+      {"pattern": "hợp đồng", "mo_ta": "Đối chiếu hợp đồng xây dựng"},
+      {"pattern": "chỉ huy trưởng|giám đốc dự án", "mo_ta": "Năng lực nhân sự chủ chốt"},
+      {"pattern": "[Pp]hù hợp|[Đđ]ạt|đủ điều kiện", "mo_ta": "Kết luận phù hợp/không phù hợp"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng kiểm tra năng lực từng nhà thầu (ĐKKD, chứng chỉ, nhân sự, thiết bị)", "pattern": "Nội dung kiểm tra.{0,100}(Kết quả|Đánh giá)|đăng ký kinh doanh.{0,200}(Đạt|Phù hợp)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có bảng kiểm tra chi tiết năng lực TỪNG nhà thầu (ĐKKD, chứng chỉ năng lực, QĐ thành lập BCH, văn bằng chứng chỉ nhân sự) không?",
+      "Hồ sơ dự thầu đã duyệt chưa? Hợp đồng có đóng dấu, đủ pháp lý không?",
+      "Có KẾT LUẬN cụ thể: năng lực con người + máy móc + thiết bị phù hợp hay không so với hồ sơ dự thầu và hợp đồng?",
+      "Có đánh giá đầy đủ cho TẤT CẢ nhà thầu tham gia (kể cả thầu phụ) không?",
+      "Năng lực nhân sự có đối chiếu quy định hiện hành (NĐ 175/2024) không?"
+    ],
+    "loi_thuong_gap": [
+      "Thiếu bảng kiểm tra chi tiết, chỉ có nhận xét tổng quát",
+      "Không có câu kết luận phù hợp/không phù hợp",
+      "Bỏ sót nhà thầu phụ"
+    ]
+  },
+
+  "muc_3": {
+    "ten": "Khối lượng, tiến độ, tổ chức thi công và ATLĐ",
+    "sub_sections": ["3.1 Khối lượng đã nghiệm thu", "3.2 Tiến độ thi công", "3.3 Tổ chức thi công", "3.4 An toàn lao động"],
+    "chu_thich_goc": "Khối lượng phải thể hiện giai đoạn này thực hiện được bao nhiêu, đánh giá so với hợp đồng. Tiến độ tương tự — bao nhiêu so với hợp đồng. Khối lượng đã được nghiệm thu, so sánh tiến độ tổng thể, có chậm không. Tổ chức thi công so với biện pháp được duyệt — đúng hay sai, có thay đổi biện pháp không. Kế hoạch đảm bảo an toàn thực hiện đúng/sai/có thay đổi không. Toàn bộ có đảm bảo ATLĐ không.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "khối lượng", "mo_ta": "Khối lượng hoàn thành"},
+      {"pattern": "nghiệm thu", "mo_ta": "Khối lượng đã nghiệm thu"},
+      {"pattern": "tiến độ", "mo_ta": "Đánh giá tiến độ so với hợp đồng/tiến độ duyệt"},
+      {"pattern": "biện pháp thi công", "mo_ta": "Đối chiếu biện pháp thi công được duyệt"},
+      {"pattern": "an toàn lao động|ATLĐ", "mo_ta": "Đánh giá an toàn lao động"},
+      {"pattern": "tai nạn", "mo_ta": "Tình trạng tai nạn lao động"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng khối lượng/tiến độ", "pattern": "(Nội dung|hạng mục|công việc).{0,120}(tiến độ|khối lượng|[Tt]hực tế)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Khối lượng có con số cụ thể và so sánh với hợp đồng không, hay chỉ ghi chung?",
+      "Tiến độ thực tế so với tiến độ được duyệt: nhanh/chậm bao nhiêu? Nguyên nhân chậm (nếu có)?",
+      "Tổ chức thi công đúng hay sai so với biện pháp được duyệt? Có thay đổi biện pháp không?",
+      "ATLĐ: có tai nạn không? Có đủ các nhóm tiêu chí (tai nạn, bảo hộ, VSMT/PCCC/ANTT, an toàn điện, an toàn máy) không?",
+      "Nếu TVGS chỉ giám sát MỘT PHẦN: có dùng đúng cụm 'một phần' không, hay viết như giám sát toàn bộ?"
+    ],
+    "loi_thuong_gap": [
+      "Gộp tất cả hạng mục thành 1 câu, thiếu chi tiết",
+      "Thiếu cụm 'một phần' khi phạm vi TVGS không bao gồm toàn bộ",
+      "Ghi 'đảm bảo tiến độ' nhưng không có số liệu so sánh"
+    ]
+  },
+
+  "muc_4": {
+    "ten": "Thí nghiệm, kiểm tra vật liệu, sản phẩm, cấu kiện, thiết bị lắp đặt",
+    "chu_thich_goc": "Phải có BẢNG THỐNG KÊ thí nghiệm — bao nhiêu nhà thầu thì bấy nhiêu bảng. Bảng thể hiện số lần thí nghiệm, đạt/không đạt, đánh giá. Đánh giá kiểm soát thí nghiệm/kiểm tra vật liệu đúng hay sai, SO SÁNH với kế hoạch thí nghiệm đã được chấp thuận. Nêu rõ CĐT đã phê duyệt kế hoạch thí nghiệm chưa — nếu chưa phải có ý kiến.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "vật liệu", "mo_ta": "Kiểm tra vật liệu"},
+      {"pattern": "thí nghiệm", "mo_ta": "Công tác thí nghiệm"},
+      {"pattern": "kế hoạch thí nghiệm", "mo_ta": "Đối chiếu kế hoạch thí nghiệm được chấp thuận"},
+      {"pattern": "LAS-XD|Las-XD|VILAS|Vilas|phòng thí nghiệm", "mo_ta": "Tên + mã số phòng thí nghiệm"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng danh mục vật liệu chính / thống kê thí nghiệm", "pattern": "([Tt]ên vật liệu|vật liệu chính).{0,100}(xuất xứ|nguồn gốc)|(STT|TT).{0,100}thí nghiệm"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Vật liệu LOẠI GÌ — có danh mục cụ thể (bê tông, thép, xi măng, cát...) không?",
+      "Thí nghiệm Ở ĐÂU — có tên + mã số phòng thí nghiệm (LAS-XD số mấy) không?",
+      "Có bảng thống kê thí nghiệm cho TỪNG nhà thầu, thể hiện số lần và kết quả đạt/không đạt không?",
+      "Có so sánh với kế hoạch thí nghiệm đã được CĐT chấp thuận không? KH thí nghiệm đã duyệt chưa?"
+    ],
+    "loi_thuong_gap": [
+      "Chỉ ghi 'đảm bảo yêu cầu' chung chung, thiếu danh mục và tên PTN",
+      "Không nhắc đến kế hoạch thí nghiệm được duyệt"
+    ]
+  },
+
+  "muc_5": {
+    "ten": "Kiểm định, quan trắc, thí nghiệm đối chứng",
+    "chu_thich_goc": "CẢNH BÁO NHẦM LẪN: mục này KHÔNG phải nói về thí nghiệm vật liệu thông thường (đã nằm ở mục 4). Mục này nói về: KIỂM ĐỊNH công trình, kiểm định máy móc (có máy móc gì phải kiểm định thì kê vào), kiểm định liên quan PCCC; QUAN TRẮC (lún, nghiêng); THÍ NGHIỆM ĐỐI CHỨNG (thí nghiệm bất thường, đối chứng chất lượng). Nếu có thì nêu vào, không phải mô tả thí nghiệm vật liệu theo kế hoạch thí nghiệm ở mục trước.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "kiểm định", "mo_ta": "Công tác kiểm định"},
+      {"pattern": "quan trắc", "mo_ta": "Công tác quan trắc (lún/nghiêng/chuyển vị)"},
+      {"pattern": "thí nghiệm đối chứng", "mo_ta": "Thí nghiệm đối chứng (có/không)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Nội dung có bị NHẦM sang thí nghiệm vật liệu thông thường (thuộc mục 4) không?",
+      "Công trình có yêu cầu quan trắc lún/nghiêng không? (CT cấp I, cao tầng thường BẮT BUỘC)",
+      "Máy móc thiết bị yêu cầu kiểm định (cẩu tháp, vận thăng...) có được kê và kiểm định không?",
+      "Nếu có quan trắc: ai thực hiện, đề cương ai lập, CĐT duyệt chưa, chu kỳ thế nào?",
+      "Nếu ghi 'Không': có căn cứ miễn không, hay là thiếu sót?",
+      "TVGS có tự đưa kết quả quan trắc cụ thể vào không? (Nếu có → vượt phạm vi — kết quả thuộc báo cáo nhà thầu quan trắc)"
+    ],
+    "loi_thuong_gap": [
+      "Nhầm nội dung thí nghiệm vật liệu vào mục kiểm định/quan trắc",
+      "Ghi 'Không' mà không giải thích lý do (đặc biệt CT cấp I)",
+      "TVGS tự đưa kết quả quan trắc cụ thể — vượt phạm vi"
+    ]
+  },
+
+  "muc_6": {
+    "ten": "Tổ chức nghiệm thu công việc xây dựng, nghiệm thu giai đoạn",
+    "sub_sections": ["6.1 Nghiệm thu công việc", "6.2 Nghiệm thu giai đoạn"],
+    "chu_thich_goc": "Phải thể hiện hạng mục/công trình có bao nhiêu công việc nghiệm thu. Nghiệm thu có chia giai đoạn không (móng, hầm, cọc khoan nhồi, phần thân, hoàn thiện, cơ điện, hạ tầng)? Nếu có phải thể hiện rõ; nếu không thì nêu rõ 'không có nghiệm thu giai đoạn'. Phải có BẢNG KÊ danh mục nghiệm thu.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "nghiệm thu công việc|nghiệm thu.{0,30}công việc", "mo_ta": "Nghiệm thu công việc xây dựng"},
+      {"pattern": "nghiệm thu giai đoạn|giai đoạn", "mo_ta": "Nghiệm thu giai đoạn (có/không)"},
+      {"pattern": "hoàn công", "mo_ta": "Bản vẽ hoàn công"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng kê danh mục nghiệm thu / kiểm tra hồ sơ nghiệm thu", "pattern": "(STT|TT).{0,120}nghiệm thu|(hồ sơ|nhật ký|biên bản).{0,80}(Đầy đủ|Đạt)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có bảng kê danh mục công việc/giai đoạn đã nghiệm thu không?",
+      "Có nêu rõ CÓ hay KHÔNG nghiệm thu giai đoạn? Giai đoạn nào (móng/hầm/cọc/thân/hoàn thiện/cơ điện/hạ tầng)?",
+      "Có mô tả quy trình nghiệm thu (nội bộ NTC → TVGS → CĐT) không?",
+      "Thành phần ký biên bản nghiệm thu có đủ tư cách không?",
+      "Có nhầm 'theo thiết kế được duyệt' với 'theo biện pháp thi công được phê duyệt' không?"
+    ],
+    "loi_thuong_gap": [
+      "Nhầm 'biện pháp thi công được phê duyệt' thành 'thiết kế được duyệt'",
+      "Thiếu bảng kê danh mục nghiệm thu"
+    ]
+  },
+
+  "muc_7": {
+    "ten": "Thay đổi thiết kế và thẩm định, phê duyệt thiết kế điều chỉnh",
+    "chu_thich_goc": "Nếu có thay đổi thiết kế phải thể hiện bằng DANH MỤC: có thay đổi gì, ai phê duyệt, đã duyệt chưa. Nếu chưa duyệt phải có ý kiến đề nghị phê duyệt. Nếu thay đổi cần THẨM ĐỊNH/THẨM TRA thì đã thể hiện chưa — nếu chưa phải đặt câu hỏi.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "thay đổi thiết kế|điều chỉnh thiết kế|sửa đổi thiết kế|Không có thay đổi", "mo_ta": "Xác nhận có/không thay đổi thiết kế"}
+    ],
+    "cau_hoi_tu_duy": [
+      "CÓ hay KHÔNG thay đổi thiết kế? Trả lời rõ ràng hay mơ hồ?",
+      "Nếu CÓ: có danh mục không? Bao nhiêu thay đổi? Ai phê duyệt? Đủ thẩm quyền không? Có ảnh hưởng kết cấu chính không?",
+      "Thay đổi có thuộc diện phải thẩm định/thẩm tra lại không? Đã thực hiện chưa? Nếu chưa, báo cáo có đặt vấn đề không?",
+      "Nếu chưa được duyệt: có ý kiến đề nghị phê duyệt không?"
+    ],
+    "loi_thuong_gap": [
+      "Viết 'đã được phê duyệt' nhưng không rõ có thay đổi hay không",
+      "Có thay đổi nhưng không lập danh mục",
+      "Bỏ qua yêu cầu thẩm định/thẩm tra thiết kế điều chỉnh"
+    ]
+  },
+
+  "muc_8": {
+    "ten": "Tồn tại, khiếm khuyết chất lượng, sự cố và khắc phục",
+    "chu_thich_goc": "Thống kê tồn tại phải bằng DANH MỤC. Có danh mục thống kê tồn tại không? Nếu có thì đã khắc phục chưa? Nếu chưa phải ghi yêu cầu khắc phục, đánh giá nguyên nhân, giải pháp so với quy định hiện hành.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "tồn tại|khiếm khuyết|Không còn tồn tại|Không có", "mo_ta": "Xác nhận có/không tồn tại, khiếm khuyết"},
+      {"pattern": "sự cố", "mo_ta": "Xác nhận có/không sự cố công trình"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có danh mục thống kê tồn tại không (hay chỉ câu xác nhận chung)?",
+      "Tồn tại đã khắc phục chưa? Nếu chưa: có yêu cầu khắc phục + nguyên nhân + biện pháp không?",
+      "Nếu có sự cố: đã nêu nguyên nhân, biện pháp và kết quả khắc phục theo quy định chưa?",
+      "ĐỐI CHIẾU CHÉO: mục 12/kết luận có nhắc tồn tại nào mà mục 8 không nêu không (và ngược lại)?"
+    ],
+    "loi_thuong_gap": [
+      "Mục 8 ghi 'không còn tồn tại' nhưng kết luận lại nêu 'còn một số tồn tại cần khắc phục' — mâu thuẫn nội bộ"
+    ]
+  },
+
+  "muc_9": {
+    "ten": "Sự phù hợp của hồ sơ quản lý chất lượng",
+    "chu_thich_goc": "Yêu cầu rất rõ: phải đánh giá hồ sơ QLCL bằng cách SO SÁNH với quy định trong NĐ 06/2021 (Phụ lục VIb - danh mục hồ sơ hoàn thành). Phù hợp thì đánh giá phù hợp, không phù hợp thì nói không phù hợp.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "hồ sơ quản lý chất lượng|hồ sơ QLCL", "mo_ta": "Nhắc đến hồ sơ QLCL"},
+      {"pattern": "06/2021|NĐ 06|Nghị định 06", "mo_ta": "Dẫn chiếu NĐ 06/2021"},
+      {"pattern": "phù hợp|đầy đủ|đúng quy định", "mo_ta": "Kết luận phù hợp/không phù hợp"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng/Phụ lục danh mục hồ sơ QLCL", "pattern": "(hoàn công|biên bản nghiệm thu|nhật ký).{0,80}(Đạt|Đầy đủ|Có)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có đánh giá hồ sơ QLCL bằng cách so sánh với quy định NĐ 06/2021 không, hay chỉ ghi 'phù hợp' suông?",
+      "Có bảng/phụ lục liệt kê danh mục hồ sơ QLCL không?",
+      "Kết luận phù hợp/không phù hợp có rõ ràng không?"
+    ],
+    "loi_thuong_gap": [
+      "Ghi 'phù hợp quy định hiện hành' mà không dẫn chiếu NĐ 06/2021",
+      "Nhồi cả nội dung quy trình vận hành/bảo trì (thuộc mục 11) vào mục 9"
+    ]
+  },
+
+  "muc_10": {
+    "ten": "Tuân thủ pháp luật về môi trường, PCCC và quy định khác",
+    "chu_thich_goc": "Trong quá trình thi công, CĐT và các bên tham gia có tuân thủ pháp luật về MÔI TRƯỜNG (ban đầu có đánh giá tác động môi trường — quá trình thi công có đáp ứng không), PCCC (có tuân thủ hồ sơ thẩm duyệt/thẩm định/nghiệm thu PCCC không), và quy định pháp luật khác liên quan không. Phải nêu rõ có tuân thủ đầy đủ hay không.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "môi trường", "mo_ta": "Tuân thủ pháp luật môi trường"},
+      {"pattern": "phòng cháy|PCCC", "mo_ta": "Tuân thủ pháp luật PCCC"},
+      {"pattern": "đánh giá tác động môi trường|ĐTM|ĐGTĐMT|giấy phép môi trường", "mo_ta": "Dẫn chiếu hồ sơ môi trường (ĐTM/GPMT)"},
+      {"pattern": "thẩm duyệt", "mo_ta": "Dẫn chiếu văn bản thẩm duyệt PCCC"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Môi trường: có dẫn chiếu hồ sơ ĐTM/giấy phép môi trường (số, ngày, ai duyệt) không? Quá trình thi công có đáp ứng không?",
+      "PCCC: công trình được thẩm duyệt PCCC theo văn bản nào? Thi công có tuân thủ hồ sơ thẩm duyệt không?",
+      "Có kết luận rõ 'tuân thủ đầy đủ' hay không, cho từng nhóm pháp luật?"
+    ],
+    "loi_thuong_gap": [
+      "Ghi 'tuân thủ các quy định' chung chung, không dẫn chiếu số văn bản cụ thể"
+    ]
+  },
+
+  "muc_11": {
+    "ten": "Sự phù hợp của quy trình vận hành, quy trình bảo trì",
+    "chu_thich_goc": "Quy trình vận hành/bảo trì đã được xây dựng chưa? Do tư vấn thiết kế lập chưa? Bản thân TVGS đã NHÌN THẤY, đã ĐỌC quy trình này chưa? Đọc rồi thì đánh giá thế nào? Phải thể hiện rõ ở mục này.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "quy trình vận hành", "mo_ta": "Quy trình vận hành"},
+      {"pattern": "quy trình bảo trì|bảo trì", "mo_ta": "Quy trình bảo trì"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Quy trình vận hành/bảo trì đã được lập chưa? Ai lập (nhà thầu thiết kế)?",
+      "TVGS đã xem/đọc quy trình chưa và đánh giá thế nào? (Không được xác nhận 'phù hợp' nếu chưa đọc)",
+      "Với báo cáo hoàn thành GIAI ĐOẠN giữa chừng (vd phần ngầm): quy trình có thể chưa lập xong — phải ghi 'đang được triển khai xây dựng' chứ không xác nhận 'phù hợp'",
+      "Mục này có bị bỏ sót hoặc nhét chung vào mục 9 không?"
+    ],
+    "loi_thuong_gap": [
+      "Xác nhận 'phù hợp' ở giai đoạn thi công khi quy trình chưa được lập xong",
+      "Bỏ hẳn mục 11, hoặc gộp 1 câu vào mục 9"
+    ]
+  },
+
+  "muc_12": {
+    "ten": "Đánh giá các điều kiện nghiệm thu hoàn thành",
+    "chu_thich_goc": "Phải nêu rõ: CÓ ĐẢM BẢO để nghiệm thu hoàn thành gói thầu/giai đoạn/hạng mục/công trình hay chưa, hay là NGHIỆM THU CÓ ĐIỀU KIỆN — nếu có điều kiện thì điều kiện đó là gì, phải nêu rõ.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "đủ điều kiện nghiệm thu|điều kiện nghiệm thu", "mo_ta": "Kết luận về điều kiện nghiệm thu"},
+      {"pattern": "đề nghị|Kính đề nghị", "mo_ta": "Câu đề nghị CĐT tổ chức nghiệm thu"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có kết luận RÕ: đủ điều kiện nghiệm thu / nghiệm thu có điều kiện / chưa đủ điều kiện?",
+      "Nếu nghiệm thu CÓ ĐIỀU KIỆN: điều kiện cụ thể là gì, có được nêu rõ không?",
+      "Có nêu tên gói thầu/giai đoạn/hạng mục cụ thể được đề nghị nghiệm thu không?",
+      "Có câu đề nghị CĐT/BQLDA tổ chức nghiệm thu không?",
+      "Kết luận có NHẤT QUÁN với mục 8 (tồn tại) và mục 3 (tiến độ) không?"
+    ],
+    "loi_thuong_gap": [
+      "Kết luận 'đủ điều kiện' trong khi mục 8 còn tồn tại chưa khắc phục mà không nêu là nghiệm thu có điều kiện",
+      "Thiếu thời gian thực hiện hợp đồng trong kết luận"
+    ]
+  },
+
+  "phu_luc": {
+    "description": "Các phụ lục đi kèm báo cáo hoàn thành. Phần này KHÔNG ĐƯỢC BỎ QUA khi kiểm tra — nhiều nội dung bắt buộc (bảng năng lực, danh mục hồ sơ QLCL, hình ảnh) nằm ở đây.",
+    "phu_luc_bat_buoc": [
+      {"ten": "Phụ lục I", "noi_dung": "Báo cáo kiểm tra năng lực và hệ thống QLCL của nhà thầu thi công (bảng kiểm tra ĐKKD, chứng chỉ, nhân sự, máy móc thiết bị)"},
+      {"ten": "Phụ lục II", "noi_dung": "Tài liệu quản lý chất lượng (danh mục hồ sơ QLCL)"},
+      {"ten": "Phụ lục III", "noi_dung": "Hình ảnh thi công tiêu biểu"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Thân báo cáo có dẫn chiếu 'xem phụ lục X đính kèm' mà phụ lục đó KHÔNG tồn tại trong file không?",
+      "Ngược lại: có phụ lục trong file nhưng thân báo cáo không dẫn chiếu không?",
+      "Bảng trong phụ lục có đủ cột Nội dung kiểm tra / Kết quả / Đánh giá không?"
+    ]
+  },
+
+  "chu_ky": {
+    "description": "Báo cáo hoàn thành theo mẫu IVb cần: GIÁM SÁT TRƯỞNG ký + NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT của tổ chức TVGS ký, ghi rõ họ tên, chức vụ và ĐÓNG DẤU",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "GIÁM SÁT TRƯỞNG|Giám sát trưởng", "mo_ta": "Chữ ký Giám sát trưởng"},
+      {"pattern": "ĐẠI DIỆN|GIÁM ĐỐC|TỔNG GIÁM ĐỐC", "mo_ta": "Chữ ký người đại diện theo pháp luật (ký + đóng dấu)"}
+    ]
+  },
+
+  "pattern_ghi_chu_chua_xoa": {
+    "description": "Pattern phát hiện ghi chú hướng dẫn/trao đổi nội bộ còn sót trong file",
+    "patterns": [
+      {"pattern": "thế nào\\?|ở đâu\\?|ra sao\\?|là gì\\?", "mo_ta": "Câu hỏi hướng dẫn chưa xóa"},
+      {"pattern": "phải bỏ|phải sửa|chưa rõ|cần hỏi|check lại|xem lại chỗ này", "mo_ta": "Nhận xét nội bộ chưa xóa"},
+      {"pattern": "Sao lại|tại sao lại|có đúng không\\?", "mo_ta": "Phản biện chưa xử lý"}
+    ],
+    "luu_y": "Những pattern này có thể xuất hiện HỢP LỆ trong nội dung mô tả. Chỉ flag khi nằm ở vị trí BẤT THƯỜNG (giữa tiêu đề, cuối câu đánh giá, ngoặc đơn...)."
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "_meta": {
+    "name": "Tiêu chí kiểm tra BÁO CÁO ĐỊNH KỲ công tác giám sát thi công (Phụ lục IVa - NĐ 06/2021)",
+    "loai_bao_cao": "dinh_ky",
+    "so_muc": 8,
+    "version": "2.0",
+    "description": "Báo cáo ĐỊNH KỲ về công tác giám sát thi công xây dựng công trình/hạng mục công trình — lập theo kỳ (tuần/tháng/quý), nội dung luôn gắn với 'trong kỳ báo cáo'. Khác với báo cáo hoàn thành (12 mục, Phụ lục IVb).",
+    "created": "2026-06-10",
+    "updated_by": "Hoàng Đức Vũ + Claude (từ chú thích trong file Phu luc 4 - ND 06-2021.docx)"
+  },
+
+  "cau_truc_muc": {
+    "description": "8 đầu mục bắt buộc theo Phụ lục IVa NĐ 06/2021",
+    "sections": [
+      {"id": 1, "ten": "Đánh giá sự phù hợp về quy mô, công năng so với GPXD, thiết kế, chỉ dẫn kỹ thuật, biện pháp thi công, biện pháp an toàn, quy chuẩn tiêu chuẩn"},
+      {"id": 2, "ten": "Đánh giá sự phù hợp về năng lực của các nhà thầu thi công so với hồ sơ dự thầu và hợp đồng xây dựng"},
+      {"id": 3, "ten": "Đánh giá khối lượng, tiến độ hoàn thành trong kỳ, công tác tổ chức thi công và ATLĐ"},
+      {"id": 4, "ten": "Thống kê công tác thí nghiệm trong kỳ, đánh giá kiểm soát chất lượng thí nghiệm/vật liệu"},
+      {"id": 5, "ten": "Thống kê công việc xây dựng được nghiệm thu trong kỳ, nghiệm thu giai đoạn (nếu có)"},
+      {"id": 6, "ten": "Thống kê các thay đổi thiết kế trên công trường trong kỳ"},
+      {"id": 7, "ten": "Thống kê tồn tại, khiếm khuyết chất lượng, sự cố trong kỳ và việc khắc phục"},
+      {"id": 8, "ten": "Đề xuất, kiến nghị về tiến độ, nhân sự, thiết kế và các vấn đề kỹ thuật khác"}
+    ]
+  },
+
+  "mo_dau": {
+    "description": "Phần mở đầu: quốc hiệu, số văn bản, kính gửi, kỳ báo cáo",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "Kính gửi", "mo_ta": "Kính gửi Chủ đầu tư"},
+      {"pattern": "Số\\s*:|Số\\.", "mo_ta": "Số văn bản báo cáo"},
+      {"pattern": "từ ngày.{0,40}đến (hết )?ngày|từ.{0,15}/.{0,15}đến", "mo_ta": "Kỳ báo cáo: từ ngày... đến ngày... (BẮT BUỘC với báo cáo định kỳ)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Báo cáo có ghi rõ KỲ báo cáo (từ ngày... đến ngày...) không? Đây là dấu hiệu phân biệt báo cáo định kỳ.",
+      "Tên tổ chức TVGS và tên Chủ đầu tư có đúng, đủ không?"
+    ]
+  },
+
+  "muc_1": {
+    "ten": "Sự phù hợp về quy mô, công năng",
+    "chu_thich_goc": "Đầu tiên phải mô tả được quy mô chính và công năng chính của công trình: chiều cao tầng, số tầng hầm, số tầng nổi, công năng (văn phòng, bệnh viện, trường học...), thông số kỹ thuật chính (dài, rộng, cao, diện tích sàn, diện tích tầng hầm), bậc chịu lửa. Sau đó phải đánh giá quy mô + công năng so với 6 đối tượng: (1) giấy phép xây dựng — có GPXD không, số bao nhiêu, ngày nào, phù hợp không; (2) thiết kế xây dựng; (3) chỉ dẫn kỹ thuật; (4) biện pháp thi công; (5) biện pháp đảm bảo an toàn; (6) quy chuẩn, tiêu chuẩn áp dụng. Và toàn bộ hồ sơ này đã được phê duyệt chưa, phê duyệt đúng chức năng/trình tự không.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "quy mô", "mo_ta": "Mô tả quy mô"},
+      {"pattern": "công năng", "mo_ta": "Mô tả công năng"},
+      {"pattern": "tầng hầm|tầng nổi|số tầng|chiều cao", "mo_ta": "Thông số tầng/chiều cao"},
+      {"pattern": "giấy phép xây dựng|GPXD|miễn.{0,10}phép", "mo_ta": "Đánh giá so với GPXD (hoặc nêu miễn phép)"},
+      {"pattern": "thiết kế", "mo_ta": "Đánh giá so với thiết kế xây dựng"},
+      {"pattern": "chỉ dẫn kỹ thuật", "mo_ta": "Đánh giá so với chỉ dẫn kỹ thuật"},
+      {"pattern": "biện pháp thi công", "mo_ta": "Đánh giá so với biện pháp thi công"},
+      {"pattern": "an toàn", "mo_ta": "Đánh giá so với biện pháp đảm bảo an toàn"},
+      {"pattern": "quy chuẩn|tiêu chuẩn", "mo_ta": "Đánh giá so với quy chuẩn/tiêu chuẩn"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có mô tả đủ quy mô chính: số tầng hầm, số tầng nổi, chiều cao, diện tích sàn, bậc chịu lửa không?",
+      "Có nêu rõ công trình CÓ hay KHÔNG có GPXD? Nếu có thì số mấy, ngày nào?",
+      "Có đánh giá đủ cả 6 đối tượng: GPXD, thiết kế, chỉ dẫn KT, BPTC, BP an toàn, quy chuẩn/tiêu chuẩn không?",
+      "Các hồ sơ trên đã được phê duyệt chưa? Phê duyệt đúng chức năng, trình tự không?"
+    ],
+    "loi_thuong_gap": [
+      "Chỉ mô tả quy mô mà không đánh giá đủ 6 đối tượng so sánh",
+      "Thiếu bậc chịu lửa, thiếu thông số diện tích"
+    ]
+  },
+
+  "muc_2": {
+    "ten": "Năng lực nhà thầu thi công (so với hồ sơ dự thầu + hợp đồng)",
+    "chu_thich_goc": "a) Tên đơn vị thi công. b) Đánh giá năng lực chỉ huy trưởng/giám đốc dự án/người phụ trách kỹ thuật so với hợp đồng và quy định pháp luật hiện hành (NĐ 175/2024) — phải có BẢNG KÊ thể hiện đánh giá bằng tiêu chí gì. c) Thống kê + đánh giá máy móc thiết bị phục vụ thi công TRONG KỲ so với hợp đồng — phải có BẢNG THỐNG KÊ. Phải thể hiện hồ sơ dự thầu đã được duyệt chưa, hợp đồng xây dựng có đóng dấu/đủ pháp lý không.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "năng lực", "mo_ta": "Đánh giá năng lực"},
+      {"pattern": "hồ sơ dự thầu|dự thầu", "mo_ta": "Đối chiếu hồ sơ dự thầu"},
+      {"pattern": "hợp đồng", "mo_ta": "Đối chiếu hợp đồng xây dựng"},
+      {"pattern": "chỉ huy trưởng|giám đốc dự án|phụ trách kỹ thuật", "mo_ta": "Đánh giá nhân sự chủ chốt của nhà thầu"},
+      {"pattern": "máy móc|thiết bị", "mo_ta": "Thống kê máy móc thiết bị trong kỳ"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng kê đánh giá năng lực nhân sự chủ chốt (CHT/GĐDA/phụ trách KT)", "pattern": "(chỉ huy trưởng|nhân sự).{0,200}(Đạt|Phù hợp|Đánh giá)|Nội dung kiểm tra.{0,100}(Kết quả|Đánh giá)"},
+      {"ten": "Bảng thống kê máy móc, thiết bị trong kỳ", "pattern": "(STT|TT).{0,80}(máy|thiết bị)|(máy móc|thiết bị).{0,120}(số lượng|Đạt|đánh giá)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có nêu tên TỪNG đơn vị thi công không?",
+      "Hồ sơ dự thầu đã được duyệt chưa? Hợp đồng xây dựng có đóng dấu, đủ tính pháp lý không?",
+      "Có bảng kê tiêu chí đánh giá chỉ huy trưởng/GĐDA/phụ trách kỹ thuật, đối chiếu hợp đồng và NĐ 175/2024 không?",
+      "Có bảng thống kê máy móc thiết bị TRONG KỲ và đánh giá phù hợp với hợp đồng không?"
+    ],
+    "loi_thuong_gap": [
+      "Chỉ nhận xét chung 'đủ năng lực' mà không có bảng kê tiêu chí",
+      "Thống kê máy móc cả dự án thay vì trong kỳ báo cáo",
+      "Dẫn chiếu nghị định cũ (NĐ 15/2021) thay vì NĐ 175/2024"
+    ]
+  },
+
+  "muc_3": {
+    "ten": "Khối lượng, tiến độ trong kỳ, tổ chức thi công và ATLĐ",
+    "chu_thich_goc": "Khối lượng phải thể hiện TRONG KỲ này thực hiện được bao nhiêu, đánh giá thế nào so với hợp đồng. Tiến độ tương tự — bao nhiêu so với hợp đồng. Toàn bộ phải mô tả TRONG KỲ BÁO CÁO, không phải giai đoạn trước/sau/chưa thực hiện. a) Khối lượng đã hoàn thành trong kỳ, khối lượng đã được nghiệm thu, so sánh tiến độ tổng thể, nguyên nhân chậm (nếu có). b) Tổ chức thi công so với biện pháp được duyệt — làm đúng hay sai, có thay đổi biện pháp không. c) Thực hiện kế hoạch đảm bảo an toàn — đúng/sai/có thay đổi không.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "trong kỳ|kỳ báo cáo", "mo_ta": "Nội dung gắn với kỳ báo cáo"},
+      {"pattern": "khối lượng", "mo_ta": "Khối lượng hoàn thành trong kỳ"},
+      {"pattern": "nghiệm thu", "mo_ta": "Khối lượng đã được nghiệm thu"},
+      {"pattern": "tiến độ", "mo_ta": "So sánh với tiến độ tổng thể"},
+      {"pattern": "biện pháp thi công", "mo_ta": "Đối chiếu biện pháp thi công được duyệt"},
+      {"pattern": "an toàn", "mo_ta": "Thực hiện kế hoạch đảm bảo an toàn"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Khối lượng có ghi RÕ con số thực hiện trong kỳ và so sánh với hợp đồng không?",
+      "Có khối lượng đã nghiệm thu, so sánh tiến độ tổng thể, và nguyên nhân chậm (nếu chậm) không?",
+      "Nội dung có đúng phạm vi TRONG KỲ không, hay lẫn cả giai đoạn trước/sau?",
+      "Tổ chức thi công đúng hay sai so với biện pháp được duyệt? Có thay đổi biện pháp không?",
+      "Kế hoạch đảm bảo an toàn được thực hiện đúng/sai/có thay đổi không?"
+    ],
+    "loi_thuong_gap": [
+      "Mô tả khối lượng cả dự án thay vì trong kỳ",
+      "Ghi 'đảm bảo tiến độ' chung chung không có con số so sánh"
+    ]
+  },
+
+  "muc_4": {
+    "ten": "Thống kê thí nghiệm trong kỳ, kiểm soát chất lượng vật liệu",
+    "chu_thich_goc": "Phải có BẢNG THỐNG KÊ thí nghiệm — có bao nhiêu nhà thầu thì phải có bằng đấy bảng thống kê. Bảng phải thể hiện số lần thí nghiệm, các lần thí nghiệm đạt/không đạt, đánh giá thế nào. Đánh giá việc kiểm soát thí nghiệm/kiểm tra vật liệu đúng hay sai, so sánh với KẾ HOẠCH THÍ NGHIỆM đã được chấp thuận. Phải nêu rõ Chủ đầu tư đã phê duyệt kế hoạch thí nghiệm chưa — nếu chưa thì phải có ý kiến.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "thí nghiệm", "mo_ta": "Công tác thí nghiệm"},
+      {"pattern": "thống kê|bảng", "mo_ta": "Thống kê thí nghiệm"},
+      {"pattern": "kế hoạch thí nghiệm", "mo_ta": "Đối chiếu kế hoạch thí nghiệm được chấp thuận"},
+      {"pattern": "vật liệu", "mo_ta": "Kiểm tra vật liệu/sản phẩm xây dựng"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng thống kê thí nghiệm theo từng nhà thầu", "pattern": "(STT|TT).{0,100}thí nghiệm|thí nghiệm.{0,120}(số lượng|kết quả|Đạt)"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có bảng thống kê thí nghiệm cho TỪNG nhà thầu không (bao nhiêu nhà thầu = bấy nhiêu bảng)?",
+      "Bảng có thể hiện số lần thí nghiệm và kết quả đạt/không đạt từng loại không?",
+      "Có đánh giá kiểm soát thí nghiệm so với kế hoạch thí nghiệm đã được chấp thuận không?",
+      "CĐT đã phê duyệt kế hoạch thí nghiệm chưa? Nếu chưa, báo cáo có ý kiến không?"
+    ],
+    "loi_thuong_gap": [
+      "Chỉ ghi 'kết quả thí nghiệm đạt yêu cầu' mà không có bảng thống kê",
+      "Không nói gì về kế hoạch thí nghiệm được duyệt"
+    ]
+  },
+
+  "muc_5": {
+    "ten": "Thống kê công việc nghiệm thu trong kỳ, nghiệm thu giai đoạn",
+    "chu_thich_goc": "Phải thể hiện TRONG KỲ có bao nhiêu công việc nghiệm thu. Nghiệm thu có chia giai đoạn không (móng, hầm, cọc khoan nhồi, phần thân, hoàn thiện, cơ điện, hạ tầng)? Nếu có phải thể hiện rõ; nếu không thì nêu 'không có nghiệm thu giai đoạn trong kỳ báo cáo'. Phải có BẢNG KÊ danh mục nghiệm thu trong kỳ.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "nghiệm thu", "mo_ta": "Công việc được nghiệm thu trong kỳ"},
+      {"pattern": "giai đoạn", "mo_ta": "Nghiệm thu giai đoạn (có/không)"}
+    ],
+    "bang_bieu_bat_buoc": [
+      {"ten": "Bảng kê danh mục nghiệm thu trong kỳ", "pattern": "(STT|TT).{0,120}nghiệm thu|danh mục.{0,60}nghiệm thu"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có bảng kê danh mục công việc nghiệm thu TRONG KỲ không?",
+      "Có nêu rõ CÓ hay KHÔNG có nghiệm thu giai đoạn trong kỳ không? (Nếu không có phải ghi rõ)",
+      "Nếu có nghiệm thu giai đoạn: giai đoạn nào (móng/hầm/cọc/thân/hoàn thiện/cơ điện/hạ tầng)?"
+    ],
+    "loi_thuong_gap": [
+      "Không có bảng kê, chỉ mô tả chung",
+      "Bỏ trống nội dung nghiệm thu giai đoạn thay vì ghi rõ 'không có'"
+    ]
+  },
+
+  "muc_6": {
+    "ten": "Thống kê thay đổi thiết kế trong kỳ",
+    "chu_thich_goc": "Nếu có thay đổi thiết kế phải thể hiện bằng DANH MỤC. Danh mục chỉ rõ có thay đổi gì, ai phê duyệt, đã được duyệt chưa. Nếu chưa duyệt thì phải có ý kiến đề nghị phê duyệt.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "thay đổi thiết kế|điều chỉnh thiết kế|Không có thay đổi", "mo_ta": "Xác nhận có/không thay đổi thiết kế trong kỳ"}
+    ],
+    "cau_hoi_tu_duy": [
+      "CÓ hay KHÔNG có thay đổi thiết kế trong kỳ? Trả lời có rõ ràng không?",
+      "Nếu CÓ: có danh mục thống kê không? Ai phê duyệt? Đã duyệt chưa?",
+      "Nếu chưa duyệt: có ý kiến đề nghị phê duyệt không?"
+    ],
+    "loi_thuong_gap": [
+      "Có thay đổi nhưng không lập danh mục",
+      "Không nói rõ trạng thái phê duyệt"
+    ]
+  },
+
+  "muc_7": {
+    "ten": "Tồn tại, khiếm khuyết chất lượng, sự cố trong kỳ",
+    "chu_thich_goc": "Thống kê tồn tại phải bằng DANH MỤC. Có danh mục thống kê tồn tại trong kỳ không? Nếu có thì đã khắc phục chưa? Nếu chưa khắc phục phải ghi yêu cầu khắc phục, đánh giá nguyên nhân, giải pháp so với quy định hiện hành. Lưu ý ghi chú (4) của Phụ lục IVa: nếu trong kỳ có SỰ CỐ công trình thì phải gửi kèm hồ sơ giải quyết sự cố.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "tồn tại|khiếm khuyết|sự cố|Không", "mo_ta": "Xác nhận có/không tồn tại, khiếm khuyết, sự cố"},
+      {"pattern": "khắc phục", "mo_ta": "Tình trạng khắc phục"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có danh mục thống kê tồn tại trong kỳ không (hay chỉ mô tả chung)?",
+      "Tồn tại đã được khắc phục chưa? Nếu chưa, có yêu cầu khắc phục + nguyên nhân + giải pháp không?",
+      "Nếu trong kỳ có sự cố công trình: có gửi kèm hồ sơ giải quyết sự cố theo quy định không?"
+    ],
+    "loi_thuong_gap": [
+      "Liệt kê tồn tại nhưng không nói trạng thái khắc phục",
+      "Có sự cố nhưng không kèm hồ sơ giải quyết sự cố"
+    ]
+  },
+
+  "muc_8": {
+    "ten": "Đề xuất, kiến nghị",
+    "chu_thich_goc": "Có đề xuất, kiến nghị gì về tiến độ, nhân sự, thiết kế và các vấn đề khác phải nêu rõ, cụ thể. QUAN TRỌNG: nếu toàn bộ phần phía trên có vấn đề (tồn tại, chậm tiến độ...) mà phần này không có đề xuất kiến nghị gì thì rất VÔ LÝ — phải đối chiếu chéo.",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "đề xuất|kiến nghị", "mo_ta": "Có nội dung đề xuất/kiến nghị"}
+    ],
+    "cau_hoi_tu_duy": [
+      "Có đề xuất/kiến nghị cụ thể về tiến độ, nhân sự, thiết kế, kỹ thuật không?",
+      "ĐỐI CHIẾU CHÉO: các mục 3, 6, 7 phía trên có nêu vấn đề (chậm tiến độ, tồn tại chưa khắc phục, thay đổi chưa duyệt) không? Nếu CÓ vấn đề mà mục 8 KHÔNG kiến nghị gì → vô lý, phải cảnh báo."
+    ],
+    "loi_thuong_gap": [
+      "Phía trên nêu tồn tại/chậm tiến độ nhưng mục đề xuất ghi 'không có kiến nghị gì'"
+    ]
+  },
+
+  "chu_ky": {
+    "description": "Báo cáo định kỳ chỉ cần GIÁM SÁT TRƯỞNG ký, ghi rõ họ tên (theo mẫu IVa)",
+    "tu_khoa_bat_buoc": [
+      {"pattern": "GIÁM SÁT TRƯỞNG|Giám sát trưởng", "mo_ta": "Chữ ký Giám sát trưởng"}
+    ]
+  },
+
+  "pattern_ghi_chu_chua_xoa": {
+    "description": "Pattern phát hiện ghi chú nội bộ còn sót",
+    "patterns": [
+      {"pattern": "thế nào\\?|ở đâu\\?|ra sao\\?|là gì\\?", "mo_ta": "Câu hỏi hướng dẫn chưa xóa"},
+      {"pattern": "phải bỏ|phải sửa|chưa rõ|cần hỏi|check lại|xem lại chỗ này", "mo_ta": "Nhận xét nội bộ chưa xóa"},
+      {"pattern": "Sao lại|tại sao lại|có đúng không\\?", "mo_ta": "Phản biện chưa xử lý"}
+    ],
+    "luu_y": "Chỉ flag khi nằm ở vị trí bất thường (giữa tiêu đề, cuối câu đánh giá, trong ngoặc đơn)."
+  }
+}
