@@ -188,14 +188,44 @@ def walk_docx(path):
     return items
 
 
-def walk_pdf(path):
-    """Fallback for PDF: pdftotext -layout, mỗi dòng thành 1 paragraph."""
+def _pdf_text_pdftotext(path):
+    """Đọc PDF bằng poppler (pdftotext -layout) — tốt nhất nếu có cài."""
+    r = subprocess.run(['pdftotext', '-layout', path, '-'],
+                       capture_output=True, timeout=120)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.decode('utf-8', 'ignore')[:200] or 'pdftotext failed')
+    return r.stdout.decode('utf-8', 'ignore')
+
+
+def _pdf_text_pypdf(path):
+    """Fallback thuần Python (pypdf) — chạy được mọi nơi, không cần poppler."""
+    import logging
+    logging.getLogger('pypdf').setLevel(logging.ERROR)  # ém warning PDF không chuẩn
     try:
-        r = subprocess.run(['pdftotext', '-layout', path, '-'],
-                           capture_output=True, timeout=120)
-        txt = r.stdout.decode('utf-8', 'ignore')
-    except Exception as e:
-        raise RuntimeError(f'Khong doc duoc PDF ({e}). Hay convert sang docx truoc (skill pdf-to-word).')
+        from pypdf import PdfReader
+    except ImportError:
+        from PyPDF2 import PdfReader  # tên gói cũ
+    reader = PdfReader(path)
+    return '\n'.join((page.extract_text() or '') for page in reader.pages)
+
+
+def walk_pdf(path):
+    """Đọc PDF: thử pdftotext (poppler) trước, không có thì tự chuyển sang pypdf."""
+    txt, errs = None, []
+    for fn in (_pdf_text_pdftotext, _pdf_text_pypdf):
+        try:
+            txt = fn(path)
+            if txt and txt.strip():
+                break
+            errs.append(f'{fn.__name__}: không trích xuất được text')
+            txt = None
+        except Exception as e:
+            errs.append(f'{fn.__name__}: {str(e)[:120]}')
+    if txt is None:
+        raise RuntimeError(
+            'Không đọc được PDF (' + ' | '.join(errs) + '). '
+            'PDF dạng scan/ảnh không trích xuất được chữ — hãy convert sang .docx rồi tải lại. '
+            'Nếu chạy trên máy cá nhân: pip install pypdf.')
     items = []
     for line in txt.split('\n'):
         t = ' '.join(line.split())
