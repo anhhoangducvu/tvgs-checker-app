@@ -277,15 +277,16 @@ RE_CAN_CU  = re.compile(r'^(các\s+)?căn cứ', re.IGNORECASE)
 RE_KET_LUAN = re.compile(r'^kết luận', re.IGNORECASE)
 RE_PHU_LUC = re.compile(r'^phụ\s*lục\s*([IVX0-9]+)?', re.IGNORECASE)
 RE_HINH_ANH = re.compile(r'(một số )?hình ảnh', re.IGNORECASE)
-RE_NUM_HEAD = re.compile(r'^\s*(\d{1,2})\s*[\.\):](?!\d)\s*')
-RE_ROMAN_HEAD = re.compile(r'^\s*([IVX]{1,4})\s*[\.\):]\s+')
+RE_NUM_HEAD = re.compile(r'^\s*(\d{1,2})\s*[\.\):/](?!\d)\s*')   # bắt cả dạng "4/ ..."
+RE_ROMAN_HEAD = re.compile(r'^\s*([IVX]{1,4})\s*[\.\):/]\s+')
 RE_MUC_HEAD = re.compile(r'^\s*Mục\s+(\d{1,2})\b', re.IGNORECASE)
+RE_TOC_LINE = re.compile(r'\.{5,}\s*\d*\s*$')   # dòng MỤC LỤC: "..... 12"
 
 
 def heading_ordinal(item):
     """Trả về số thứ tự mục nếu paragraph trông như tiêu đề mục cấp 1, else None."""
     t = item['text']
-    if len(t) > 220:
+    if len(t) > 220 or RE_TOC_LINE.search(t):
         return None
     if item['label'] and item.get('ilvl') == 0:
         lm = re.match(r'^([IVX]{1,4})[\.\)]?$', item['label'].strip())
@@ -338,6 +339,8 @@ def match_keywords(text, kw_map, priority):
 def is_heading_candidate(item):
     t = item['text']
     if item['kind'] != 'p' or not t or len(t) > 220:
+        return False
+    if RE_TOC_LINE.search(t):   # dòng mục lục không phải tiêu đề thật
         return False
     if heading_ordinal(item) is not None:
         return True
@@ -488,6 +491,28 @@ def parse(items, report_type):
     refs = sorted(set(m.group(0).strip() for m in
                       re.finditer(r'[Pp]hụ lục\s+[IVX0-9]+', body_text)))
 
+    # --- đánh SỐ cho từng phụ lục (từ tiêu đề; nếu tiêu đề bị cắt dòng thì nội suy theo thứ tự) ---
+    def _ref_num(s):
+        s = s.strip().upper()
+        return int(s) if s.isdigit() else roman_to_int(s)
+
+    prev_so = 0
+    for a in appendices:
+        m = re.search(r'PHỤ\s*LỤC\s*[:\.]?\s*([IVX]+\b|\d{1,2})', a['ten'].upper())
+        if m is None:  # tiêu đề không có số (vd 'MỘT SỐ HÌNH ẢNH...') → thử tìm trong nội dung đầu
+            m = re.search(r'PHỤ\s*LỤC\s*[:\.]?\s*([IVX]+\b|\d{1,2})', out.get(a['key'], '')[:120].upper())
+        a['so'] = _ref_num(m.group(1)) if m else prev_so + 1
+        prev_so = a['so']
+
+    # --- mục nào dẫn chiếu phụ lục nào ("Xem phụ lục III" → muc_4: [3]) ---
+    refs_per_muc = {}
+    for k in ['mo_dau', 'can_cu'] + expected + ['ket_luan']:
+        txt = out.get(k, '')
+        nums = sorted(set(_ref_num(m.group(1)) for m in
+                          re.finditer(r'[Pp]hụ\s*lục\s*[:\s]?\s*([IVX]+\b|\d{1,2})', txt)))
+        if nums:
+            refs_per_muc[k] = nums
+
     meta = {
         'sections_found': found,
         'sections_missing': missing,
@@ -496,6 +521,7 @@ def parse(items, report_type):
         'trang_bia_detected': bool(out.get('trang_bia')),
         'phu_luc_found': appendices,
         'phu_luc_referenced_in_body': refs,
+        'phu_luc_refs_per_muc': refs_per_muc,
         'chu_ky': {'giam_sat_truong': has_gst_sign, 'dai_dien_phap_luat': has_daidien_sign},
     }
     return out, meta
@@ -553,7 +579,6 @@ def main():
         for a in m['phu_luc_found']: print(f"  • {a['ten'][:80]} ({a['key']})")
         if m['phu_luc_referenced_in_body']:
             print(f"Phụ lục được dẫn chiếu trong thân: {', '.join(m['phu_luc_referenced_in_body'])}")
-        ck = m['chu_ky']
         ck = m['chu_ky']
         print(f"Chữ ký: GST={'CÓ' if ck['giam_sat_truong'] else 'THIẾU'}, Đại diện PL={'CÓ' if ck['dai_dien_phap_luat'] else 'THIẾU/không cần (định kỳ)'}")
 

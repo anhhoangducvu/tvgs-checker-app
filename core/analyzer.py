@@ -113,18 +113,34 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
             add_issue('muc_5', msg, loi=True)
             findings.append(('LOI', msg))
 
-    # 4) Phụ lục dẫn chiếu nhưng không có trong file
+    # 4) Đối chiếu phụ lục: mục dẫn chiếu phụ lục nào thì phụ lục đó phải có trong file.
+    # LƯU Ý "CÁCH 2": nhiều đơn vị lập báo cáo kiểu ghi cơ bản + "Xem phụ lục X" —
+    # đây là cách HỢP LỆ. Nội dung phụ lục sẽ được GỘP vào mục khi chấm (xem dưới).
     apx = meta.get('phu_luc_found', [])
-    apx_text = ' '.join(a['ten'].upper() for a in apx)
-    for r in meta.get('phu_luc_referenced_in_body', []):
-        num = r.split()[-1].upper()
-        if not apx:
-            msg = (f"Thân báo cáo dẫn chiếu '{r}' nhưng file KHÔNG có phụ lục nào — "
-                   "phải đính kèm hoặc bỏ dẫn chiếu.")
-            findings.append(('LOI', msg)); add_issue('phu_luc', msg, loi=True)
-        elif not re.search(r'PHỤ\s*LỤC\s*' + re.escape(num) + r'\b', apx_text):
-            msg = f"Dẫn chiếu '{r}' nhưng không thấy tiêu đề phụ lục tương ứng trong file."
-            findings.append(('LOI', msg)); add_issue('phu_luc', msg, loi=True)
+    apx_by_so = {}            # số phụ lục -> key (phu_luc_1...)
+    for a in apx:
+        if a.get('so') and a['so'] not in apx_by_so:
+            apx_by_so[a['so']] = a['key']
+    refs_per_muc = meta.get('phu_luc_refs_per_muc', {})
+
+    def _roman(n):
+        vals = [(10, 'X'), (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I')]
+        out_s = ''
+        while n > 0:
+            for v, s in vals:
+                if n >= v:
+                    out_s += s; n -= v; break
+        return out_s
+
+    missing_refs_all = set()
+    for sec_key, nums in refs_per_muc.items():
+        for n in nums:
+            if n not in apx_by_so:
+                missing_refs_all.add(n)
+                msg = (f"{sec_key.replace('_', ' ')} dẫn chiếu 'Phụ lục {_roman(n)}' nhưng "
+                       "KHÔNG tìm thấy phụ lục này trong file — phải đính kèm hoặc bỏ dẫn chiếu.")
+                add_issue(sec_key, msg, loi=True)
+                findings.append(('LOI', msg))
 
     # 5) Chữ ký
     ck = meta.get('chu_ky', {})
@@ -168,9 +184,16 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
 
     # 9) Riêng báo cáo định kỳ
     if rtype == 'dinh_ky':
-        if not re.search(r'từ ngày.{0,40}đến (hết )?ngày', g('mo_dau') + g('trang_bia'), re.IGNORECASE):
-            msg = "Báo cáo ĐỊNH KỲ bắt buộc ghi rõ KỲ BÁO CÁO (từ ngày... đến ngày...) — chưa thấy."
-            findings.append(('LOI', msg)); add_issue('mo_dau', msg, loi=True)
+        dau = g('mo_dau') + ' ' + g('trang_bia')
+        if not re.search(r'từ ngày.{0,40}đến (hết )?ngày', dau, re.IGNORECASE):
+            if re.search(r'tháng\s*\d{1,2}\s*[/\-.]\s*\d{2,4}|quý\s*[IVX1-4]', dau, re.IGNORECASE):
+                # ghi kỳ theo tháng/quý — chấp nhận được, chỉ nhắc nhẹ
+                findings.append(('CAN_SUA',
+                    "Kỳ báo cáo ghi theo tháng/quý — nên ghi rõ 'từ ngày... đến ngày...' "
+                    "theo đúng mẫu Phụ lục IVa."))
+            else:
+                msg = "Báo cáo ĐỊNH KỲ bắt buộc ghi rõ KỲ BÁO CÁO (từ ngày... đến ngày...) — chưa thấy."
+                findings.append(('LOI', msg)); add_issue('mo_dau', msg, loi=True)
         # phía trên có vấn đề mà mục 8 không kiến nghị
         has_van_de = bool(re.search(r'chậm tiến độ|chưa khắc phục|tồn tại', g('muc_3') + g('muc_7'), re.IGNORECASE)) \
             and not re.search(r'không có tồn tại|không còn tồn tại', g('muc_7'), re.IGNORECASE)
@@ -179,8 +202,9 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
                    "'không có đề xuất, kiến nghị' — phải có kiến nghị tương ứng.")
             findings.append(('LOI', msg)); add_issue('muc_8', msg, loi=True)
 
-    # 10) Công trình cấp I mà mục 5 ghi Không
-    if re.search(r'cấp\s*I\b|công trình cấp 1\b', g('muc_1'), re.IGNORECASE):
+    # 10) Công trình cấp I mà mục 5 (kiểm định/quan trắc) ghi Không — CHỈ với báo cáo hoàn thành
+    # (báo cáo định kỳ mục 5 là thống kê nghiệm thu, không liên quan quan trắc)
+    if rtype == 'hoan_thanh' and re.search(r'cấp\s*I\b|công trình cấp 1\b', g('muc_1'), re.IGNORECASE):
         m5 = g('muc_5')
         if m5 and re.search(r'^|\n\s*[-+]?\s*Không\b', m5) and not re.search(r'quan trắc', m5, re.IGNORECASE):
             msg = ("Công trình CẤP I: quan trắc (lún/nghiêng/chuyển vị) thường BẮT BUỘC — "
@@ -210,9 +234,22 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
                                  'dat_duoc': [], 'van_de': van_de})
             continue
 
-        passed, missing = _check_entries(text, sc.get('tu_khoa_bat_buoc', []))
-        tbl_passed, tbl_missing = _check_entries(text, sc.get('bang_bieu_bat_buoc', []))
+        # "CÁCH 2": mục dẫn chiếu phụ lục → GỘP nội dung phụ lục vào mục khi chấm
+        refs = refs_per_muc.get(key, [])
+        resolved = [n for n in refs if n in apx_by_so]
+        aug_text = text
         n_tbl = tbl_counts.get(key, 0)
+        for n in resolved:
+            ak = apx_by_so[n]
+            aug_text += '\n' + g(ak)
+            n_tbl += tbl_counts.get(ak, 0)
+        if resolved:
+            dat_duoc.append('Trình bày theo cách dẫn chiếu: chi tiết tại Phụ lục '
+                            + ', '.join(_roman(n) for n in resolved)
+                            + ' (đã kiểm tra gộp nội dung phụ lục).')
+
+        passed, missing = _check_entries(aug_text, sc.get('tu_khoa_bat_buoc', []))
+        tbl_passed, tbl_missing = _check_entries(aug_text, sc.get('bang_bieu_bat_buoc', []))
         total_pass += len(passed) + len(tbl_passed)
         total_miss += len(missing)
 
@@ -230,9 +267,9 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
             else:
                 van_de.append('Thiếu bảng bắt buộc: ' + m + '.')
 
-        # sơ sài?
+        # sơ sài? (KHÔNG cảnh báo nếu mục dẫn chiếu phụ lục — cách 2 hợp lệ)
         min_len = MIN_LEN_EXCEPTIONS.get(key, MIN_LEN_DEFAULT)
-        if len(text) < min_len and not re.search(r'Không\b', text):
+        if len(text) < min_len and not resolved and not re.search(r'Không\b', text):
             van_de.append(f'Nội dung rất ngắn ({len(text)} ký tự) — có dấu hiệu sơ sài, cần rà soát.')
 
         st = _grade(len(missing) + len(tbl_missing), len(passed) + len(missing),
@@ -322,7 +359,7 @@ def guess_project_info(extracted):
         'hang_muc_giai_doan': r'(?:GIAI ĐOẠN/HẠNG MỤC|HẠNG MỤC|GIAI ĐOẠN|GÓI THẦU)\s*:\s*(.+)',
         'chu_dau_tu': r'(?:CHỦ ĐẦU TƯ|Chủ đầu tư)\s*:\s*(.+)',
         'don_vi_lap': r'(?:TV GIÁM SÁT|ĐƠN VỊ TVGS|TVGS)\s*:\s*(.+)',
-        'ky_bao_cao': r'(từ ngày[^\n]{5,60}đến (?:hết )?ngày[^\n]{0,20})',
+        'ky_bao_cao': r'(từ ngày[^\n]{5,60}đến (?:hết )?ngày[^\n]{0,20}|tháng\s*\d{1,2}\s*[/\-.]\s*\d{2,4})',
     }
     for k, p in pats.items():
         m = re.search(p, src, re.IGNORECASE)
