@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-tvgs-checker-app — Kiểm tra báo cáo TVGS (Phụ lục IV NĐ 06/2021) trên web.
+tvgs-checker-app — Kiểm tra báo cáo TVGS (Phụ lục IV) trên web.
 Phòng Kỹ thuật — Công ty Cổ phần TEXO Tư vấn và Đầu tư.
+
+Hỗ trợ CẢ HAI nghị định (dùng song song trong giai đoạn chuyển tiếp):
+  - NĐ 06/2021: định kỳ 8 mục (IVa) / hoàn thành 12 mục (IVb)
+  - NĐ 207/2026 (hiệu lực 01/7/2027): định kỳ 9 mục / hoàn thành 13 mục
 
 HYBRID: lớp quy tắc (rule-based) luôn chạy, miễn phí, cục bộ.
 AI là LỰA CHỌN bổ sung — người dùng tự nhập API key (Claude/Gemini/OpenAI/tương thích).
@@ -30,6 +34,40 @@ CRIT_DIR = os.path.join(APP_DIR, 'criteria')
 # Tên cố định (đặt làm hằng số — không cần UI): người đánh giá để TRỐNG khi chưa rõ
 TRUONG_PHONG_TEN = 'Hoàng Đức Vũ'
 NGUOI_DANH_GIA_TEN = ''
+
+# Chọn bộ tiêu chí theo (loại báo cáo, nghị định)
+CRIT_MAP = {
+    ('dinh_ky', 'nd06'): 'dinh_ky_8muc.json',
+    ('dinh_ky', 'nd207'): 'dinh_ky_9muc.json',
+    ('hoan_thanh', 'nd06'): 'hoan_thanh_12muc.json',
+    ('hoan_thanh', 'nd207'): 'hoan_thanh_13muc.json',
+}
+
+# ---------------- LƯU / XÓA API KEY TẠI MÁY (tùy chọn) ----------------
+KEYS_FILE = os.path.join(APP_DIR, '.api_keys.json')
+
+
+def load_saved_keys():
+    try:
+        with open(KEYS_FILE, encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_key(provider, api_key, base_url):
+    d = load_saved_keys()
+    d[provider] = {'api_key': api_key or '', 'base_url': base_url or ''}
+    with open(KEYS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(d, f, ensure_ascii=False, indent=2)
+
+
+def delete_key(provider):
+    d = load_saved_keys()
+    d.pop(provider, None)
+    with open(KEYS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(d, f, ensure_ascii=False, indent=2)
+
 
 st.set_page_config(page_title='TVGS Checker — TEXO', page_icon='📋', layout='wide')
 
@@ -68,11 +106,25 @@ with st.sidebar:
         provider = st.selectbox('Nhà cung cấp AI', prov_keys,
                                 format_func=lambda k: llm.PROVIDERS[k]['label'])
         st.caption(llm.PROVIDERS[provider]['note'])
-        api_key = st.text_input('API key', type='password',
-                                help='Key chỉ giữ trong phiên làm việc này, KHÔNG lưu lại.')
+
+        saved = load_saved_keys()
+        sk = saved.get(provider, {})
+        has_saved = provider in saved
+        if has_saved:
+            st.caption('🔑 Đã có key lưu sẵn cho nhà cung cấp này trên máy.')
+        api_key = st.text_input('API key', value=sk.get('api_key', ''), type='password',
+                                help='Có thể bấm "Lưu key vào máy" để lần sau khỏi nhập lại.')
         if llm.PROVIDERS[provider]['needs_base_url']:
-            base_url = st.text_input('Base URL (bắt buộc)',
+            base_url = st.text_input('Base URL (bắt buộc)', value=sk.get('base_url', ''),
                                      placeholder='https://openrouter.ai/api/v1')
+
+        ka, kb = st.columns(2)
+        if ka.button('💾 Lưu key vào máy', use_container_width=True, disabled=not api_key):
+            save_key(provider, api_key, base_url)
+            st.success('Đã lưu key vào máy này (file .api_keys.json trong thư mục app).')
+        if kb.button('🗑️ Xóa key đã lưu', use_container_width=True, disabled=not has_saved):
+            delete_key(provider)
+            st.warning('Đã xóa key đã lưu cho nhà cung cấp này. Tải lại trang (F5) để làm mới ô nhập.')
 
         mkey = f'models_{provider}'
         if st.button('🔄 Lấy danh sách model', use_container_width=True,
@@ -101,10 +153,13 @@ with st.sidebar:
     st.divider()
     st.subheader('🔐 Bảo mật')
     st.markdown(
-        '- API key **chỉ giữ trong phiên**, app **không lưu** key của bạn.\n'
+        '- Mặc định API key **chỉ giữ trong phiên**. Nếu bấm **"Lưu key vào máy"**, key được lưu '
+        '**dạng văn bản thường** vào file `.api_keys.json` trong thư mục app — chỉ nên dùng trên '
+        '**máy cá nhân của bạn**, KHÔNG dùng trên máy chung/đám mây công khai. Bấm '
+        '**"Xóa key đã lưu"** để gỡ bất cứ lúc nào.\n'
         '- Bật AI ⇒ **toàn văn báo cáo được gửi** tới nhà cung cấp AI bạn chọn. '
         'Báo cáo mật/nhạy cảm → dùng chế độ Không AI (xử lý cục bộ).\n'
-        '- Không dán key trên máy công cộng; không chia sẻ key; lộ key do cách dùng '
+        '- Không dán/lưu key trên máy công cộng; không chia sẻ key; lộ key do cách dùng '
         'thuộc trách nhiệm người dùng.\n'
         '- Mật khẩu app đổi được qua **Settings → Secrets** (`APP_PASSWORD`).')
 
@@ -116,8 +171,8 @@ with st.sidebar:
             '- OpenAI: platform.openai.com → API keys\n'
             '- OpenRouter: openrouter.ai → Keys (dùng loại "Tương thích OpenAI", '
             'Base URL `https://openrouter.ai/api/v1`)\n\n'
-            '**Các bước:** dán key → bấm *Lấy danh sách model* → chọn model → '
-            '*Kiểm tra kết nối* → quay lại trang chính bấm *Phân tích sâu bằng AI*.\n\n'
+            '**Các bước:** dán key → (tùy chọn) *Lưu key vào máy* → bấm *Lấy danh sách model* → '
+            'chọn model → *Kiểm tra kết nối* → quay lại trang chính bấm *Phân tích sâu bằng AI*.\n\n'
             '**Lỗi thường gặp:**\n'
             '- `401/403`: key sai, hoặc dùng key OpenRouter mà quên điền Base URL\n'
             '- `404`: model đã bị gỡ → bấm lại *Lấy danh sách model*\n'
@@ -135,7 +190,7 @@ st.markdown(
     "<span style='color:#1F4E79;font-size:26px;font-weight:800'>📋 TVGS Checker</span> "
     "<span style='color:#E8731A;font-weight:700'> — Phiếu đánh giá báo cáo TVGS</span><br>"
     "<span style='color:#595959'>Phòng Kỹ thuật — Công ty Cổ phần TEXO Tư vấn và Đầu tư · "
-    "Phụ lục IV NĐ 06/2021 (định kỳ 8 mục / hoàn thành 12 mục)</span></div>",
+    "Phụ lục IV NĐ 06/2021 (ĐK 8 / HT 12 mục) &amp; NĐ 207/2026 (ĐK 9 / HT 13 mục)</span></div>",
     unsafe_allow_html=True)
 
 if not use_ai:
@@ -147,8 +202,14 @@ else:
     st.warning('🧠 Đã chọn dùng AI nhưng **chưa đủ thiết lập** (key / model / Base URL) — '
                'hoàn thiện ở thanh bên trái. Trong lúc đó app vẫn chạy chế độ quy tắc.')
 
-type_choice = st.radio('Loại báo cáo', ['Tự nhận diện', 'HOÀN THÀNH (12 mục)', 'ĐỊNH KỲ (8 mục)'],
-                       horizontal=True)
+cs1, cs2 = st.columns(2)
+type_choice = cs1.radio('Loại báo cáo', ['Tự nhận diện', 'HOÀN THÀNH', 'ĐỊNH KỲ'],
+                        horizontal=True)
+nd_choice = cs2.radio('Nghị định áp dụng',
+                      ['Tự nhận diện', 'NĐ 207/2026 (mới)', 'NĐ 06/2021 (cũ)'],
+                      horizontal=True,
+                      help='Cả 2 mẫu được dùng song song trong giai đoạn chuyển tiếp. '
+                           'Để "Tự nhận diện" nếu không chắc.')
 up = st.file_uploader('Tải lên báo cáo TVGS (.docx — khuyến nghị, hoặc .pdf)',
                       type=['docx', 'pdf'])
 if not up:
@@ -169,16 +230,22 @@ except Exception as err:
 
 forced = ('hoan_thanh' if 'HOÀN THÀNH' in type_choice
           else 'dinh_ky' if 'ĐỊNH KỲ' in type_choice else None)
+forced_decree = ('nd207' if '207' in nd_choice
+                 else 'nd06' if '06/2021' in nd_choice else None)
+
 rtype, conf, signals = ex.detect_type(items, forced)
 if rtype == 'unknown':
     rtype = 'hoan_thanh'
     signals.append('Không chắc chắn — mặc định HOÀN THÀNH, chọn thủ công nếu sai.')
 
-sections, meta = ex.parse(items, rtype)
-extracted = {'_meta': {'source_file': up.name, 'loai_bao_cao': rtype,
-                       'do_tin_cay': conf, 'dau_hieu_nhan_dien': signals, **meta},
+decree, dconf, dsignals = ex.detect_decree(items, rtype, forced_decree)
+
+sections, meta = ex.parse(items, rtype, decree)
+extracted = {'_meta': {'source_file': up.name, 'loai_bao_cao': rtype, 'nghi_dinh': decree,
+                       'do_tin_cay': conf, 'do_tin_cay_nghi_dinh': dconf,
+                       'dau_hieu_nhan_dien': signals, 'dau_hieu_nghi_dinh': dsignals, **meta},
              **sections}
-crit_file = 'dinh_ky_8muc.json' if rtype == 'dinh_ky' else 'hoan_thanh_12muc.json'
+crit_file = CRIT_MAP[(rtype, decree)]
 with open(os.path.join(CRIT_DIR, crit_file), encoding='utf-8') as f:
     criteria = json.load(f)
 
@@ -188,7 +255,7 @@ base_review = analyzer.analyze(extracted, criteria,
 base_review.update({k: v for k, v in analyzer.guess_project_info(extracted).items() if v})
 
 # ---------------- LỚP AI (tùy chọn) ----------------
-file_sig = f'{up.name}_{up.size}_{rtype}'
+file_sig = f'{up.name}_{up.size}_{rtype}_{decree}'
 if st.session_state.get('ai_sig') != file_sig:
     st.session_state.pop('ai_review', None)   # file mới -> bỏ kết quả AI cũ
     st.session_state['ai_sig'] = file_sig
@@ -216,16 +283,25 @@ review = json.loads(json.dumps(ai_result if using_ai_result else base_review))
 mode_tag = 'ai' if using_ai_result else 'rule'
 
 # ---------------- THÔNG TIN NHẬN DIỆN ----------------
+nd_label = 'NĐ 207/2026' if decree == 'nd207' else 'NĐ 06/2021'
+so_muc = meta['so_muc_chuan']
+loai_label = ('ĐỊNH KỲ' if rtype == 'dinh_ky' else 'HOÀN THÀNH') + f' ({so_muc} mục)'
 c1, c2, c3, c4 = st.columns(4)
-c1.metric('Loại báo cáo', 'ĐỊNH KỲ (8 mục)' if rtype == 'dinh_ky' else 'HOÀN THÀNH (12 mục)',
-          f'độ tin cậy {conf}')
-c2.metric('Mục tìm thấy', f"{len(meta['sections_found'])}/{meta['so_muc_chuan']}",
+c1.metric('Loại báo cáo', loai_label, f'độ tin cậy {conf}')
+c2.metric('Nghị định', nd_label, f'độ tin cậy {dconf}')
+c3.metric('Mục tìm thấy', f"{len(meta['sections_found'])}/{meta['so_muc_chuan']}",
           f"thiếu {len(meta['sections_missing'])}" if meta['sections_missing'] else 'đủ mục')
-c3.metric('Xếp loại sơ bộ', review['ket_qua_chung']['xep_loai'])
-c4.metric('Nguồn đánh giá', 'AI + quy tắc' if using_ai_result else 'Quy tắc (không AI)')
-with st.expander('Dấu hiệu nhận diện loại báo cáo'):
+c4.metric('Xếp loại sơ bộ', review['ket_qua_chung']['xep_loai'],
+          'AI + quy tắc' if using_ai_result else 'Quy tắc')
+with st.expander('Dấu hiệu nhận diện loại báo cáo & nghị định'):
+    st.markdown('**Loại báo cáo:**')
     for s in signals:
         st.write('•', s)
+    st.markdown('**Nghị định:**')
+    for s in dsignals:
+        st.write('•', s)
+    if forced_decree:
+        st.caption('⚠️ Bạn đang ÉP nghị định thủ công — bỏ ép (chọn "Tự nhận diện") nếu muốn app tự đoán.')
 
 # ---------------- HIỆU CHỈNH TRƯỚC KHI XUẤT ----------------
 st.subheader('✏️ Hiệu chỉnh trước khi xuất phiếu')

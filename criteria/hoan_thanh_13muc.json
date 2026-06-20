@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "name": "Tiêu chí kiểm tra BÁO CÁO HOÀN THÀNH công tác giám sát thi công (Phụ lục IVb - NĐ 06/2021)",
+    "name": "Tiêu chí kiểm tra BÁO CÁO HOÀN THÀNH công tác giám sát thi công (Phụ lục IVb - NĐ 207/2026)",
     "loai_bao_cao": "hoan_thanh",
-    "so_muc": 12,
+    "nghi_dinh": "nd207",
+    "so_muc": 13,
     "version": "2.0",
-    "description": "Báo cáo HOÀN THÀNH công tác giám sát thi công xây dựng gói thầu/giai đoạn/hạng mục công trình/công trình — lập khi kết thúc gói thầu, giai đoạn hoặc hạng mục. 12 mục theo Phụ lục IVb. Khác với báo cáo định kỳ (8 mục, Phụ lục IVa).",
-    "created": "2026-06-10",
-    "updated_by": "Hoàng Đức Vũ + Claude (hợp nhất tvgs_chung.json v1.0 + chú thích trong file Phu luc 4 - ND 06-2021.docx)",
-    "nghi_dinh": "nd06"
+    "description": "Báo cáo HOÀN THÀNH công tác giám sát — lập theo NĐ 207/2026/NĐ-CP (hiệu lực 01/7/2027, thay NĐ 06/2021). So với mẫu cũ 12 mục: BỔ SUNG mục 10 'Đánh giá công tác thi công theo thiết kế PCCC đã được thẩm định, phê duyệt'; mục 10 cũ (môi trường+PCCC) tách thành mục 11 (chỉ MÔI TRƯỜNG và pháp luật khác); mục 11-12 cũ dịch xuống 12-13.",
+    "created": "2026-06-20",
+    "updated_by": "Hoàng Đức Vũ + Claude (từ Phụ lục IV NĐ 207/2026 + chú thích trong file PHỤ LỤC IV - ND 207-2026.docx)"
   },
   "cau_truc_muc": {
-    "description": "12 đầu mục bắt buộc theo Phụ lục IVb NĐ 06/2021",
+    "description": "13 đầu mục bắt buộc theo Phụ lục IVb NĐ 207/2026",
     "sections": [
       {
         "id": 1,
@@ -50,14 +50,18 @@
       },
       {
         "id": 10,
-        "ten": "Đánh giá sự tuân thủ pháp luật về môi trường, PCCC và quy định khác"
+        "ten": "Đánh giá công tác thi công theo thiết kế PCCC đã được thẩm định, phê duyệt (mục MỚI NĐ 207/2026)"
       },
       {
         "id": 11,
-        "ten": "Đánh giá sự phù hợp của quy trình vận hành, quy trình bảo trì"
+        "ten": "Tuân thủ pháp luật về bảo vệ môi trường và pháp luật khác có liên quan"
       },
       {
         "id": 12,
+        "ten": "Đánh giá sự phù hợp của quy trình vận hành, quy trình bảo trì"
+      },
+      {
+        "id": 13,
         "ten": "Đánh giá về các điều kiện nghiệm thu hoàn thành gói thầu/giai đoạn/hạng mục/công trình"
       }
     ]
@@ -452,36 +456,73 @@
     ]
   },
   "muc_10": {
-    "ten": "Tuân thủ pháp luật về môi trường, PCCC và quy định khác",
-    "chu_thich_goc": "Trong quá trình thi công, CĐT và các bên tham gia có tuân thủ pháp luật về MÔI TRƯỜNG (ban đầu có đánh giá tác động môi trường — quá trình thi công có đáp ứng không), PCCC (có tuân thủ hồ sơ thẩm duyệt/thẩm định/nghiệm thu PCCC không), và quy định pháp luật khác liên quan không. Phải nêu rõ có tuân thủ đầy đủ hay không.",
+    "ten": "Công tác thi công theo thiết kế PCCC đã được thẩm định, phê duyệt",
+    "chu_thich_goc": "MỤC MỚI — điểm khác biệt của NĐ 207/2026 so với NĐ 06/2021 (mẫu cũ gộp PCCC chung với môi trường ở mục 10). Phải đánh giá công tác thi công xây dựng công trình CÓ theo đúng thiết kế về PCCC đã được THẨM ĐỊNH, PHÊ DUYỆT hay không. Báo cáo hoàn thành phải thể hiện RÕ cơ bản các đầu mục: (1) khoảng cách phòng cháy, chữa cháy; (2) đường bộ, bãi đỗ, khoảng trống phục vụ hoạt động PCCC, cứu nạn cứu hộ; (3) giải pháp thoát nạn; (4) bậc chịu lửa; (5) giải pháp ngăn cháy, chống cháy lan; (6) giải pháp chống khói; và các quy định khác của pháp luật về PCCC và cứu nạn, cứu hộ.",
+    "_canh_bao": "Mục MỚI của NĐ 207/2026 — phải thể hiện đủ 6 đầu mục PCCC, không ghi chung chung 'tuân thủ PCCC'.",
+    "tu_khoa_bat_buoc": [
+      {
+        "pattern": "phòng cháy|PCCC|chữa cháy",
+        "mo_ta": "Nội dung PCCC"
+      },
+      {
+        "pattern": "thẩm duyệt|thẩm định|phê duyệt",
+        "mo_ta": "Thiết kế PCCC được thẩm định/phê duyệt"
+      },
+      {
+        "pattern": "thoát nạn",
+        "mo_ta": "Giải pháp thoát nạn"
+      },
+      {
+        "pattern": "bậc chịu lửa",
+        "mo_ta": "Bậc chịu lửa"
+      },
+      {
+        "pattern": "ngăn cháy|chống cháy lan",
+        "mo_ta": "Giải pháp ngăn cháy, chống cháy lan"
+      },
+      {
+        "pattern": "chống khói|hút khói|tăng áp",
+        "mo_ta": "Giải pháp chống khói"
+      }
+    ],
+    "cau_hoi_tu_duy": [
+      "Có khẳng định thi công ĐÚNG theo thiết kế PCCC đã được thẩm định/phê duyệt (dẫn số văn bản thẩm duyệt) không?",
+      "Có đánh giá KHOẢNG CÁCH phòng cháy, chữa cháy giữa các hạng mục/công trình lân cận không?",
+      "Có đánh giá đường giao thông, bãi đỗ, khoảng trống phục vụ xe chữa cháy/cứu nạn cứu hộ không?",
+      "Có đánh giá GIẢI PHÁP THOÁT NẠN (lối thoát, cầu thang, đèn chỉ dẫn) không?",
+      "Có đánh giá BẬC CHỊU LỬA, giải pháp NGĂN CHÁY/CHỐNG CHÁY LAN không?",
+      "Có đánh giá GIẢI PHÁP CHỐNG KHÓI (tăng áp, hút khói) không?"
+    ],
+    "loi_thuong_gap": [
+      "Bỏ trống hoàn toàn — mục mới NĐ 207/2026 nhiều báo cáo còn quên",
+      "Chỉ ghi 'tuân thủ quy định PCCC' chung chung, không thể hiện đủ 6 đầu mục",
+      "Gộp PCCC vào mục môi trường như mẫu NĐ 06/2021 cũ"
+    ]
+  },
+  "muc_11": {
+    "ten": "Tuân thủ pháp luật về bảo vệ môi trường và pháp luật khác có liên quan",
+    "chu_thich_goc": "NĐ 207/2026 TÁCH riêng PCCC sang mục 10; mục này chỉ còn BẢO VỆ MÔI TRƯỜNG và pháp luật khác có liên quan (nếu có). Trong quá trình thi công có tuân thủ pháp luật về bảo vệ môi trường không (hồ sơ ĐTM/giấy phép môi trường đã có chưa, thi công có đáp ứng không) và các quy định pháp luật khác có liên quan.",
     "tu_khoa_bat_buoc": [
       {
         "pattern": "môi trường",
-        "mo_ta": "Tuân thủ pháp luật môi trường"
-      },
-      {
-        "pattern": "phòng cháy|PCCC",
-        "mo_ta": "Tuân thủ pháp luật PCCC"
+        "mo_ta": "Tuân thủ pháp luật bảo vệ môi trường"
       },
       {
         "pattern": "đánh giá tác động môi trường|ĐTM|ĐGTĐMT|giấy phép môi trường",
         "mo_ta": "Dẫn chiếu hồ sơ môi trường (ĐTM/GPMT)"
-      },
-      {
-        "pattern": "thẩm duyệt",
-        "mo_ta": "Dẫn chiếu văn bản thẩm duyệt PCCC"
       }
     ],
     "cau_hoi_tu_duy": [
-      "Môi trường: có dẫn chiếu hồ sơ ĐTM/giấy phép môi trường (số, ngày, ai duyệt) không? Quá trình thi công có đáp ứng không?",
-      "PCCC: công trình được thẩm duyệt PCCC theo văn bản nào? Thi công có tuân thủ hồ sơ thẩm duyệt không?",
-      "Có kết luận rõ 'tuân thủ đầy đủ' hay không, cho từng nhóm pháp luật?"
+      "Có dẫn chiếu hồ sơ ĐTM/giấy phép môi trường (số, ngày, ai duyệt) không? Quá trình thi công có đáp ứng không?",
+      "Có kết luận rõ 'tuân thủ đầy đủ' pháp luật bảo vệ môi trường hay không?",
+      "Các quy định pháp luật khác có liên quan (nếu có) đã được nêu chưa?"
     ],
     "loi_thuong_gap": [
-      "Ghi 'tuân thủ các quy định' chung chung, không dẫn chiếu số văn bản cụ thể"
+      "Ghi 'tuân thủ các quy định' chung chung, không dẫn chiếu số văn bản cụ thể",
+      "Vẫn gộp PCCC vào đây theo thói quen mẫu cũ (NĐ 207 đã tách PCCC sang mục 10)"
     ]
   },
-  "muc_11": {
+  "muc_12": {
     "ten": "Sự phù hợp của quy trình vận hành, quy trình bảo trì",
     "chu_thich_goc": "Quy trình vận hành/bảo trì đã được xây dựng chưa? Do tư vấn thiết kế lập chưa? Bản thân TVGS đã NHÌN THẤY, đã ĐỌC quy trình này chưa? Đọc rồi thì đánh giá thế nào? Phải thể hiện rõ ở mục này.",
     "tu_khoa_bat_buoc": [
@@ -505,7 +546,7 @@
       "Bỏ hẳn mục 11, hoặc gộp 1 câu vào mục 9"
     ]
   },
-  "muc_12": {
+  "muc_13": {
     "ten": "Đánh giá các điều kiện nghiệm thu hoàn thành",
     "chu_thich_goc": "Phải nêu rõ: CÓ ĐẢM BẢO để nghiệm thu hoàn thành gói thầu/giai đoạn/hạng mục/công trình hay chưa, hay là NGHIỆM THU CÓ ĐIỀU KIỆN — nếu có điều kiện thì điều kiện đó là gì, phải nêu rõ.",
     "tu_khoa_bat_buoc": [
@@ -530,6 +571,19 @@
       "Thiếu thời gian thực hiện hợp đồng trong kết luận"
     ]
   },
+  "chu_ky": {
+    "description": "Báo cáo hoàn thành theo mẫu IVb cần: GIÁM SÁT TRƯỞNG ký + NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT của tổ chức TVGS ký, ghi rõ họ tên, chức vụ và ĐÓNG DẤU",
+    "tu_khoa_bat_buoc": [
+      {
+        "pattern": "GIÁM SÁT TRƯỞNG|Giám sát trưởng",
+        "mo_ta": "Chữ ký Giám sát trưởng"
+      },
+      {
+        "pattern": "ĐẠI DIỆN|GIÁM ĐỐC|TỔNG GIÁM ĐỐC",
+        "mo_ta": "Chữ ký người đại diện theo pháp luật (ký + đóng dấu)"
+      }
+    ]
+  },
   "phu_luc": {
     "description": "Các phụ lục đi kèm báo cáo hoàn thành. Phần này KHÔNG ĐƯỢC BỎ QUA khi kiểm tra — nhiều nội dung bắt buộc (bảng năng lực, danh mục hồ sơ QLCL, hình ảnh) nằm ở đây.",
     "phu_luc_bat_buoc": [
@@ -550,19 +604,6 @@
       "Thân báo cáo có dẫn chiếu 'xem phụ lục X đính kèm' mà phụ lục đó KHÔNG tồn tại trong file không?",
       "Ngược lại: có phụ lục trong file nhưng thân báo cáo không dẫn chiếu không?",
       "Bảng trong phụ lục có đủ cột Nội dung kiểm tra / Kết quả / Đánh giá không?"
-    ]
-  },
-  "chu_ky": {
-    "description": "Báo cáo hoàn thành theo mẫu IVb cần: GIÁM SÁT TRƯỞNG ký + NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT của tổ chức TVGS ký, ghi rõ họ tên, chức vụ và ĐÓNG DẤU",
-    "tu_khoa_bat_buoc": [
-      {
-        "pattern": "GIÁM SÁT TRƯỞNG|Giám sát trưởng",
-        "mo_ta": "Chữ ký Giám sát trưởng"
-      },
-      {
-        "pattern": "ĐẠI DIỆN|GIÁM ĐỐC|TỔNG GIÁM ĐỐC",
-        "mo_ta": "Chữ ký người đại diện theo pháp luật (ký + đóng dấu)"
-      }
     ]
   },
   "pattern_ghi_chu_chua_xoa": {

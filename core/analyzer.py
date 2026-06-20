@@ -61,7 +61,20 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
             so_phieu=''):
     meta = extracted.get('_meta', {})
     rtype = meta.get('loai_bao_cao', 'hoan_thanh')
-    max_muc = meta.get('so_muc_chuan', 12 if rtype == 'hoan_thanh' else 8)
+    decree = meta.get('nghi_dinh', 'nd06')
+    default_max = (13 if decree == 'nd207' else 12) if rtype == 'hoan_thanh' else (9 if decree == 'nd207' else 8)
+    max_muc = meta.get('so_muc_chuan', default_max)
+    # Vị trí một số mục THAY ĐỔI theo nghị định (NĐ207 chèn mục) — suy ra động:
+    #  - hoàn thành: "tồn tại" luôn ở mục 8; "điều kiện nghiệm thu" ở mục cuối (12 hoặc 13)
+    #  - định kỳ:   "tồn tại" ở mục (cuối-1); "đề xuất/kiến nghị" ở mục cuối (8 hoặc 9)
+    if rtype == 'hoan_thanh':
+        key_tontai = 'muc_8'
+        key_dieukien = f'muc_{max_muc}'      # 12 (NĐ06) | 13 (NĐ207)
+        key_dexuat = None
+    else:
+        key_tontai = f'muc_{max_muc - 1}'    # 7 (NĐ06) | 8 (NĐ207)
+        key_dieukien = None
+        key_dexuat = f'muc_{max_muc}'        # 8 (NĐ06) | 9 (NĐ207)
     tbl_counts = meta.get('tables_per_section', {})
     full_text = '\n'.join(v for k, v in extracted.items() if not k.startswith('_'))
     body_keys = ['mo_dau', 'can_cu'] + [f'muc_{i}' for i in range(1, max_muc + 1)] + ['ket_luan']
@@ -81,10 +94,9 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
     # ============ TẦNG 1.5 — HEURISTIC (thay cho AI) ============
     g = lambda k: extracted.get(k, '')
 
-    # 1) Mâu thuẫn tồn tại giữa mục tồn tại và kết luận/mục 12
-    key_tontai = 'muc_8' if rtype == 'hoan_thanh' else 'muc_7'
+    # 1) Mâu thuẫn tồn tại giữa mục tồn tại và kết luận/mục điều kiện nghiệm thu
     t_tontai = g(key_tontai).lower()
-    t_kl = (g('muc_12') + ' ' + g('ket_luan')).lower()
+    t_kl = ((g(key_dieukien) if key_dieukien else '') + ' ' + g('ket_luan')).lower()
     if re.search(r'không (còn|có)\s.{0,15}tồn tại', t_tontai) and \
        re.search(r'còn\s.{0,25}tồn tại', t_kl):
         msg = (f"MÂU THUẪN NỘI BỘ: {key_tontai.replace('_', ' ')} khẳng định 'không còn tồn tại' "
@@ -194,13 +206,13 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
             else:
                 msg = "Báo cáo ĐỊNH KỲ bắt buộc ghi rõ KỲ BÁO CÁO (từ ngày... đến ngày...) — chưa thấy."
                 findings.append(('LOI', msg)); add_issue('mo_dau', msg, loi=True)
-        # phía trên có vấn đề mà mục 8 không kiến nghị
-        has_van_de = bool(re.search(r'chậm tiến độ|chưa khắc phục|tồn tại', g('muc_3') + g('muc_7'), re.IGNORECASE)) \
-            and not re.search(r'không có tồn tại|không còn tồn tại', g('muc_7'), re.IGNORECASE)
-        if has_van_de and re.search(r'không có (đề xuất|kiến nghị)|chưa có kiến nghị', g('muc_8'), re.IGNORECASE):
-            msg = ("VÔ LÝ: các mục phía trên nêu vấn đề (tồn tại/chậm tiến độ) nhưng Mục 8 lại ghi "
+        # phía trên có vấn đề mà mục đề xuất/kiến nghị (mục cuối) không kiến nghị
+        has_van_de = bool(re.search(r'chậm tiến độ|chưa khắc phục|tồn tại', g('muc_3') + g(key_tontai), re.IGNORECASE)) \
+            and not re.search(r'không có tồn tại|không còn tồn tại', g(key_tontai), re.IGNORECASE)
+        if has_van_de and re.search(r'không có (đề xuất|kiến nghị)|chưa có kiến nghị', g(key_dexuat), re.IGNORECASE):
+            msg = (f"VÔ LÝ: các mục phía trên nêu vấn đề (tồn tại/chậm tiến độ) nhưng Mục {max_muc} lại ghi "
                    "'không có đề xuất, kiến nghị' — phải có kiến nghị tương ứng.")
-            findings.append(('LOI', msg)); add_issue('muc_8', msg, loi=True)
+            findings.append(('LOI', msg)); add_issue(key_dexuat, msg, loi=True)
 
     # 10) Công trình cấp I mà mục 5 (kiểm định/quan trắc) ghi Không — CHỈ với báo cáo hoàn thành
     # (báo cáo định kỳ mục 5 là thống kê nghiệm thu, không liên quan quan trắc)
@@ -308,8 +320,9 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
         kien_nghi.append('Soát lỗi chính tả toàn văn trước khi trình ký.')
     kien_nghi = kien_nghi[:10]
 
-    loai_text = ('Báo cáo định kỳ (8 mục — Phụ lục IVa, NĐ 06/2021)' if rtype == 'dinh_ky'
-                 else 'Báo cáo hoàn thành (12 mục — Phụ lục IVb, NĐ 06/2021)')
+    nd_text = 'NĐ 207/2026' if decree == 'nd207' else 'NĐ 06/2021'
+    loai_text = (f'Báo cáo định kỳ ({max_muc} mục — Phụ lục IVa, {nd_text})' if rtype == 'dinh_ky'
+                 else f'Báo cáo hoàn thành ({max_muc} mục — Phụ lục IVb, {nd_text})')
     tom_tat = (f"Kiểm tra tự động (không AI) theo mẫu {loai_text.split('(')[1][:-1]}: "
                f"{max_muc - n_thieu}/{max_muc} mục hiện diện; "
                f"{sum(1 for m in danh_gia_muc if m['trang_thai']=='DAT')} mục đạt, "
@@ -317,7 +330,7 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
                f"{sum(1 for m in danh_gia_muc if m['trang_thai']=='LOI')} mục lỗi, {n_thieu} mục thiếu. "
                "Kết quả do công cụ quét quy tắc — cần người có chuyên môn xác nhận lại trước khi phát hành.")
     ket_luan = (f"Báo cáo được Phòng Kỹ thuật kiểm tra tự động theo bộ tiêu chí TEXO "
-                f"(xây dựng từ Phụ lục IV NĐ 06/2021 và chú thích kiểm tra nội bộ). "
+                f"(xây dựng từ Phụ lục IV {nd_text} và chú thích kiểm tra nội bộ). "
                 f"Xếp loại sơ bộ: {xep_loai}. "
                 + ("Đề nghị đơn vị lập báo cáo xử lý các kiến nghị nêu trên và gửi lại Phòng Kỹ thuật "
                    "soát xét trước khi phát hành chính thức. " if xep_loai != 'ĐẠT' else
@@ -343,7 +356,6 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
                      'muc_thieu': n_thieu},
         'danh_gia_muc': danh_gia_muc,
         'phat_hien_chinh': [{'muc_do': sev, 'noi_dung': msg} for sev, msg in findings],
-        'kien_nghi': kien_nghi,
         'ket_luan': ket_luan,
     }
     return review

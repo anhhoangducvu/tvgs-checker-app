@@ -32,12 +32,15 @@ SCHEMA = """{
 def build_prompt(extracted, criteria, base_review):
     meta = extracted.get('_meta', {})
     rtype = meta.get('loai_bao_cao', 'hoan_thanh')
-    max_muc = meta.get('so_muc_chuan', 12 if rtype == 'hoan_thanh' else 8)
-    loai = ('BÁO CÁO ĐỊNH KỲ (8 mục — Phụ lục IVa)' if rtype == 'dinh_ky'
-            else 'BÁO CÁO HOÀN THÀNH (12 mục — Phụ lục IVb)')
+    decree = meta.get('nghi_dinh', 'nd06')
+    default_max = (13 if decree == 'nd207' else 12) if rtype == 'hoan_thanh' else (9 if decree == 'nd207' else 8)
+    max_muc = meta.get('so_muc_chuan', default_max)
+    nd_text = 'NĐ 207/2026' if decree == 'nd207' else 'NĐ 06/2021'
+    loai = (f'BÁO CÁO ĐỊNH KỲ ({max_muc} mục — Phụ lục IVa, {nd_text})' if rtype == 'dinh_ky'
+            else f'BÁO CÁO HOÀN THÀNH ({max_muc} mục — Phụ lục IVb, {nd_text})')
 
     parts = [
-        f"NHIỆM VỤ: Đánh giá chất lượng {loai} của đoàn TVGS theo NĐ 06/2021 và bộ tiêu chí "
+        f"NHIỆM VỤ: Đánh giá chất lượng {loai} của đoàn TVGS theo {nd_text} và bộ tiêu chí "
         "nội bộ TEXO. Với TỪNG MỤC: đối chiếu nội dung thực tế với CHÚ THÍCH KIỂM TRA và "
         "CÂU HỎI TƯ DUY; chỉ ra cụ thể cái gì đạt, cái gì thiếu/sai (dẫn chứng ngắn). "
         "Đặc biệt chú ý: mâu thuẫn nội bộ giữa các mục; mục viết nhầm bản chất; nội dung "

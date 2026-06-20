@@ -1,8 +1,8 @@
 # tvgs-checker-app
 
-Web app kiểm tra **báo cáo Tư vấn Giám sát (TVGS)** theo Phụ lục IV — NĐ 06/2021, của Phòng Kỹ thuật — Công ty CP TEXO Tư vấn và Đầu tư.
+Web app kiểm tra **báo cáo Tư vấn Giám sát (TVGS)** theo Phụ lục IV — NĐ 06/2021 **và** NĐ 207/2026 (hiệu lực 01/7/2027), của Phòng Kỹ thuật — Công ty CP TEXO Tư vấn và Đầu tư.
 
-Hỗ trợ cả 2 loại: **báo cáo định kỳ** (8 mục — PL IVa) và **báo cáo hoàn thành** (12 mục — PL IVb). Kết quả xuất ra **phiếu đánh giá .docx** (A4, định dạng Phòng Kỹ thuật) và **HTML** xem trực tiếp.
+Hỗ trợ cả 4 mẫu (dùng song song trong giai đoạn chuyển tiếp): **định kỳ** 8 mục (NĐ06) / 9 mục (NĐ207) — PL IVa; **hoàn thành** 12 mục (NĐ06) / 13 mục (NĐ207) — PL IVb. Tự nhận diện loại + nghị định, cho phép ép thủ công. Kết quả xuất ra **phiếu đánh giá .docx** (A4, định dạng Phòng Kỹ thuật) và **HTML** xem trực tiếp.
 
 ## Hai chế độ phân tích (HYBRID)
 

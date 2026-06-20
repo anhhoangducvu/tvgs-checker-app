@@ -1,16 +1,16 @@
 {
   "_meta": {
-    "name": "Tiêu chí kiểm tra BÁO CÁO ĐỊNH KỲ công tác giám sát thi công (Phụ lục IVa - NĐ 06/2021)",
+    "name": "Tiêu chí kiểm tra BÁO CÁO ĐỊNH KỲ công tác giám sát thi công (Phụ lục IVa - NĐ 207/2026)",
     "loai_bao_cao": "dinh_ky",
-    "so_muc": 8,
+    "nghi_dinh": "nd207",
+    "so_muc": 9,
     "version": "2.0",
-    "description": "Báo cáo ĐỊNH KỲ về công tác giám sát thi công xây dựng công trình/hạng mục công trình — lập theo kỳ (tuần/tháng/quý), nội dung luôn gắn với 'trong kỳ báo cáo'. Khác với báo cáo hoàn thành (12 mục, Phụ lục IVb).",
-    "created": "2026-06-10",
-    "updated_by": "Hoàng Đức Vũ + Claude (từ chú thích trong file Phu luc 4 - ND 06-2021.docx)",
-    "nghi_dinh": "nd06"
+    "description": "Báo cáo ĐỊNH KỲ về công tác giám sát thi công — lập theo NĐ 207/2026/NĐ-CP (hiệu lực 01/7/2027, thay NĐ 06/2021). So với mẫu cũ 8 mục: BỔ SUNG mục 5 'Đánh giá sự phù hợp của kết quả thí nghiệm, quan trắc, kiểm định so với yêu cầu thiết kế'; các mục 5-8 cũ dịch xuống thành 6-9.",
+    "created": "2026-06-20",
+    "updated_by": "Hoàng Đức Vũ + Claude (từ Phụ lục IV NĐ 207/2026 + chú thích trong file PHỤ LỤC IV - ND 207-2026.docx)"
   },
   "cau_truc_muc": {
-    "description": "8 đầu mục bắt buộc theo Phụ lục IVa NĐ 06/2021",
+    "description": "9 đầu mục bắt buộc theo Phụ lục IVa NĐ 207/2026",
     "sections": [
       {
         "id": 1,
@@ -30,18 +30,22 @@
       },
       {
         "id": 5,
-        "ten": "Thống kê công việc xây dựng được nghiệm thu trong kỳ, nghiệm thu giai đoạn (nếu có)"
+        "ten": "Đánh giá sự phù hợp của kết quả thí nghiệm kiểm tra vật liệu/cấu kiện/sản phẩm, số liệu quan trắc/kiểm định SO VỚI YÊU CẦU THIẾT KẾ (mục MỚI NĐ 207/2026)"
       },
       {
         "id": 6,
-        "ten": "Thống kê các thay đổi thiết kế trên công trường trong kỳ"
+        "ten": "Thống kê công việc xây dựng được nghiệm thu trong kỳ, nghiệm thu giai đoạn (nếu có)"
       },
       {
         "id": 7,
-        "ten": "Thống kê tồn tại, khiếm khuyết chất lượng, sự cố trong kỳ và việc khắc phục"
+        "ten": "Thống kê các thay đổi thiết kế trên công trường trong kỳ"
       },
       {
         "id": 8,
+        "ten": "Thống kê tồn tại, khiếm khuyết chất lượng, sự cố trong kỳ và việc khắc phục"
+      },
+      {
+        "id": 9,
         "ten": "Đề xuất, kiến nghị về tiến độ, nhân sự, thiết kế và các vấn đề kỹ thuật khác"
       }
     ]
@@ -246,6 +250,41 @@
     ]
   },
   "muc_5": {
+    "ten": "Sự phù hợp của kết quả thí nghiệm/quan trắc/kiểm định so với yêu cầu thiết kế",
+    "chu_thich_goc": "MỤC MỚI của NĐ 207/2026 (NĐ 06/2021 không có). Phải đánh giá sự PHÙ HỢP của kết quả thí nghiệm kiểm tra vật liệu, cấu kiện, sản phẩm xây dựng trong quá trình thi công, cùng các số liệu QUAN TRẮC, KIỂM ĐỊNH — SO VỚI YÊU CẦU THIẾT KẾ. Nghĩa là phải có chỉ tiêu/bảng THIẾT KẾ ban đầu để ĐỐI CHIẾU (vd: cường độ bê tông R28 theo thiết kế vs kết quả nén mẫu; độ lún cho phép vs số liệu quan trắc lún). KHÁC mục 4 (chỉ thống kê và kiểm soát công tác thí nghiệm): mục 5 phải KẾT LUẬN đạt/không đạt SO VỚI THIẾT KẾ.",
+    "tu_khoa_bat_buoc": [
+      {
+        "pattern": "so với.{0,25}thiết kế|yêu cầu thiết kế|đáp ứng.{0,20}thiết kế|theo thiết kế",
+        "mo_ta": "Đối chiếu với yêu cầu thiết kế"
+      },
+      {
+        "pattern": "kết quả thí nghiệm|thí nghiệm",
+        "mo_ta": "Kết quả thí nghiệm"
+      },
+      {
+        "pattern": "phù hợp|đạt|đáp ứng",
+        "mo_ta": "Kết luận phù hợp/đạt so với thiết kế"
+      }
+    ],
+    "bang_bieu_bat_buoc": [
+      {
+        "ten": "Bảng đối chiếu kết quả thí nghiệm/quan trắc với chỉ tiêu thiết kế",
+        "pattern": "(STT|TT).{0,120}(thiết kế|yêu cầu)|thiết kế.{0,80}(thực tế|kết quả|đạt)"
+      }
+    ],
+    "cau_hoi_tu_duy": [
+      "Có ĐỐI CHIẾU kết quả thí nghiệm/quan trắc/kiểm định với YÊU CẦU THIẾT KẾ không (nêu rõ chỉ tiêu thiết kế và kết quả thực tế)?",
+      "Có chỉ tiêu/bảng thiết kế gốc để so sánh không, hay chỉ ghi 'đạt yêu cầu' chung chung?",
+      "Kết luận đạt/không đạt so với thiết kế có rõ ràng cho từng loại vật liệu/cấu kiện không?",
+      "Mục này có bị viết nhầm thành chỉ thống kê thí nghiệm (trùng mục 4) không?"
+    ],
+    "loi_thuong_gap": [
+      "Chỉ liệt kê kết quả thí nghiệm mà không so với chỉ tiêu thiết kế",
+      "Ghi 'kết quả đạt yêu cầu' nhưng không dẫn giá trị thiết kế để đối chiếu",
+      "Bỏ trống mục này — mục mới NĐ 207/2026 nhiều báo cáo còn quên"
+    ]
+  },
+  "muc_6": {
     "ten": "Thống kê công việc nghiệm thu trong kỳ, nghiệm thu giai đoạn",
     "chu_thich_goc": "Phải thể hiện TRONG KỲ có bao nhiêu công việc nghiệm thu. Nghiệm thu có chia giai đoạn không (móng, hầm, cọc khoan nhồi, phần thân, hoàn thiện, cơ điện, hạ tầng)? Nếu có phải thể hiện rõ; nếu không thì nêu 'không có nghiệm thu giai đoạn trong kỳ báo cáo'. Phải có BẢNG KÊ danh mục nghiệm thu trong kỳ.",
     "tu_khoa_bat_buoc": [
@@ -274,7 +313,7 @@
       "Bỏ trống nội dung nghiệm thu giai đoạn thay vì ghi rõ 'không có'"
     ]
   },
-  "muc_6": {
+  "muc_7": {
     "ten": "Thống kê thay đổi thiết kế trong kỳ",
     "chu_thich_goc": "Nếu có thay đổi thiết kế phải thể hiện bằng DANH MỤC. Danh mục chỉ rõ có thay đổi gì, ai phê duyệt, đã được duyệt chưa. Nếu chưa duyệt thì phải có ý kiến đề nghị phê duyệt.",
     "tu_khoa_bat_buoc": [
@@ -293,7 +332,7 @@
       "Không nói rõ trạng thái phê duyệt"
     ]
   },
-  "muc_7": {
+  "muc_8": {
     "ten": "Tồn tại, khiếm khuyết chất lượng, sự cố trong kỳ",
     "chu_thich_goc": "Thống kê tồn tại phải bằng DANH MỤC. Có danh mục thống kê tồn tại trong kỳ không? Nếu có thì đã khắc phục chưa? Nếu chưa khắc phục phải ghi yêu cầu khắc phục, đánh giá nguyên nhân, giải pháp so với quy định hiện hành. Lưu ý ghi chú (4) của Phụ lục IVa: nếu trong kỳ có SỰ CỐ công trình thì phải gửi kèm hồ sơ giải quyết sự cố.",
     "tu_khoa_bat_buoc": [
@@ -316,7 +355,7 @@
       "Có sự cố nhưng không kèm hồ sơ giải quyết sự cố"
     ]
   },
-  "muc_8": {
+  "muc_9": {
     "ten": "Đề xuất, kiến nghị",
     "chu_thich_goc": "Có đề xuất, kiến nghị gì về tiến độ, nhân sự, thiết kế và các vấn đề khác phải nêu rõ, cụ thể. QUAN TRỌNG: nếu toàn bộ phần phía trên có vấn đề (tồn tại, chậm tiến độ...) mà phần này không có đề xuất kiến nghị gì thì rất VÔ LÝ — phải đối chiếu chéo.",
     "tu_khoa_bat_buoc": [

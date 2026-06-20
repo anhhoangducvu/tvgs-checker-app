@@ -238,8 +238,15 @@ def walk_pdf(path):
 
 # ------------------------------------------------------------ heading logic ---
 
-# Từ khóa nhận diện tiêu đề mục — BÁO CÁO HOÀN THÀNH (12 mục, PL IVb)
-KW_HOAN_THANH = {
+# =====================================================================
+# Từ khóa nhận diện tiêu đề mục — THEO LOẠI BÁO CÁO và NGHỊ ĐỊNH.
+# Hỗ trợ CẢ HAI nghị định (dùng song song trong giai đoạn chuyển tiếp):
+#   - NĐ 06/2021: định kỳ 8 mục (IVa), hoàn thành 12 mục (IVb)
+#   - NĐ 207/2026: định kỳ 9 mục (IVa), hoàn thành 13 mục (IVb)
+# =====================================================================
+
+# --- HOÀN THÀNH — NĐ 06/2021 (12 mục) ---
+KW_HOAN_THANH_06 = {
     1:  [r'quy mô(,| và| công trình| thông tin|.{0,15}công năng)', r'quy mô công trình'],
     2:  [r'năng lực.{0,40}nhà thầu', r'^nhà thầu thi công xây dựng\s*:?$', r'sự phù hợp về năng lực'],
     3:  [r'khối lượng.{0,30}tiến độ', r'tình hình thi công', r'khối lượng, tiến độ'],
@@ -255,8 +262,29 @@ KW_HOAN_THANH = {
          r'đánh giá về các điều kiện nghiệm thu'],
 }
 
-# Từ khóa nhận diện tiêu đề mục — BÁO CÁO ĐỊNH KỲ (8 mục, PL IVa)
-KW_DINH_KY = {
+# --- HOÀN THÀNH — NĐ 207/2026 (13 mục): chèn mục 10 PCCC, tách môi trường ---
+KW_HOAN_THANH_207 = {
+    1:  KW_HOAN_THANH_06[1],
+    2:  KW_HOAN_THANH_06[2],
+    3:  KW_HOAN_THANH_06[3],
+    4:  KW_HOAN_THANH_06[4],
+    5:  KW_HOAN_THANH_06[5],
+    6:  KW_HOAN_THANH_06[6],
+    7:  KW_HOAN_THANH_06[7],
+    8:  KW_HOAN_THANH_06[8],
+    9:  KW_HOAN_THANH_06[9],
+    10: [r'(phòng cháy|PCCC).{0,50}(thẩm định|phê duyệt|thẩm duyệt)',
+         r'thi công.{0,40}thiết kế.{0,25}(về )?(phòng cháy|PCCC)',
+         r'thiết kế.{0,20}(về )?(phòng cháy|PCCC).{0,20}(được )?(thẩm định|phê duyệt|thẩm duyệt)',
+         r'(công tác )?phòng cháy.{0,15}(và )?chữa cháy'],
+    11: [r'(bảo vệ )?môi trường', r'pháp luật.{0,20}môi trường'],
+    12: [r'quy trình vận hành', r'vận hành.{0,25}bảo trì'],
+    13: [r'điều kiện nghiệm thu (hoàn thành|.{0,30}(giai đoạn|gói thầu|hạng mục|công trình))',
+         r'đánh giá về các điều kiện nghiệm thu'],
+}
+
+# --- ĐỊNH KỲ — NĐ 06/2021 (8 mục) ---
+KW_DINH_KY_06 = {
     1: [r'(sự )?phù hợp về quy mô.{0,15}công năng', r'quy mô.{0,15}công năng'],
     2: [r'năng lực.{0,40}nhà thầu', r'sự phù hợp về năng lực'],
     3: [r'khối lượng.{0,30}tiến độ', r'tình hình thi công'],
@@ -267,11 +295,47 @@ KW_DINH_KY = {
     8: [r'đề xuất.{0,15}kiến nghị', r'kiến nghị'],
 }
 
-# thứ tự ưu tiên khi khớp từ khóa (mục đặc thù trước, mục chung chung sau)
+# --- ĐỊNH KỲ — NĐ 207/2026 (9 mục): chèn mục 5 'đối chiếu KQ thí nghiệm với thiết kế' ---
+KW_DINH_KY_207 = {
+    1: KW_DINH_KY_06[1],
+    2: KW_DINH_KY_06[2],
+    3: KW_DINH_KY_06[3],
+    4: [r'(thống kê.{0,40})?(công tác )?thí nghiệm.{0,40}(được thực hiện|trong kỳ|kiểm soát)',
+        r'kiểm soát chất lượng.{0,20}thí nghiệm', r'(thống kê.{0,30})?thí nghiệm', r'kiểm tra vật liệu'],
+    5: [r'(sự )?phù hợp.{0,60}(kết quả thí nghiệm|quan trắc|kiểm định).{0,60}(so với|yêu cầu).{0,15}thiết kế',
+        r'(kết quả thí nghiệm|quan trắc|kiểm định).{0,60}so với.{0,15}(yêu cầu )?thiết kế',
+        r'so với yêu cầu thiết kế'],
+    6: [r'(thống kê.{0,40})?nghiệm thu', r'nghiệm thu trong kỳ', r'nghiệm thu giai đoạn'],
+    7: [r'thay đổi thiết kế'],
+    8: [r'tồn tại.{0,25}khiếm khuyết', r'khiếm khuyết về chất lượng'],
+    9: [r'đề xuất.{0,15}kiến nghị', r'kiến nghị'],
+}
+
+# alias để giữ tương thích phần nhận diện loại báo cáo (dùng bản NĐ06 làm cơ sở)
+KW_HOAN_THANH = KW_HOAN_THANH_06
+KW_DINH_KY = KW_DINH_KY_06
+
+# thứ tự ưu tiên khi khớp từ khóa (mục đặc thù trước, mục chung chung sau) — theo (loại, nghị định)
 KW_PRIORITY = {
+    ('hoan_thanh', 'nd06'):  [12, 11, 10, 9, 5, 7, 8, 4, 6, 2, 3, 1],
+    ('hoan_thanh', 'nd207'): [13, 12, 11, 10, 9, 5, 8, 7, 6, 4, 2, 3, 1],
+    ('dinh_ky', 'nd06'):     [8, 6, 7, 5, 4, 2, 3, 1],
+    ('dinh_ky', 'nd207'):    [9, 7, 8, 6, 5, 4, 2, 3, 1],
+    # alias chỉ-theo-loại (mặc định NĐ06) cho phần nhận diện loại báo cáo
     'hoan_thanh': [12, 11, 10, 9, 5, 7, 8, 4, 6, 2, 3, 1],
     'dinh_ky':    [8, 6, 7, 5, 4, 2, 3, 1],
 }
+
+# tra cứu (bản đồ từ khóa, ưu tiên, số mục chuẩn) theo loại + nghị định
+def kw_for(report_type, decree):
+    decree = decree if decree in ('nd06', 'nd207') else 'nd06'
+    if report_type == 'hoan_thanh':
+        kw = KW_HOAN_THANH_207 if decree == 'nd207' else KW_HOAN_THANH_06
+        max_muc = 13 if decree == 'nd207' else 12
+    else:
+        kw = KW_DINH_KY_207 if decree == 'nd207' else KW_DINH_KY_06
+        max_muc = 9 if decree == 'nd207' else 8
+    return kw, KW_PRIORITY[(report_type, decree)], max_muc
 
 RE_CAN_CU  = re.compile(r'^(các\s+)?căn cứ', re.IGNORECASE)
 RE_KET_LUAN = re.compile(r'^kết luận', re.IGNORECASE)
@@ -381,6 +445,62 @@ def detect_type(items, forced=None):
     return typ, abs(score['hoan_thanh'] - score['dinh_ky']), signals
 
 
+def detect_decree(items, report_type, forced=None):
+    """Nhận diện NGHỊ ĐỊNH áp dụng: 'nd06' (06/2021) hay 'nd207' (207/2026).
+    Cả hai mẫu dùng song song trong giai đoạn chuyển tiếp nên phải tự đoán."""
+    if forced in ('nd06', 'nd207'):
+        return forced, 99, [f'--nghidinh {forced} (do người dùng chỉ định)']
+    full = '\n'.join(it['text'] for it in items)
+    signals = []
+    score = {'nd207': 0, 'nd06': 0}
+
+    # 1) Trích dẫn số nghị định trong căn cứ pháp lý (tín hiệu mạnh nhất)
+    if re.search(r'207\s*/\s*2026', full):
+        score['nd207'] += 6; signals.append("Dẫn chiếu 'Nghị định 207/2026'")
+    if re.search(r'\b06\s*/\s*2021', full):
+        score['nd06'] += 4; signals.append("Dẫn chiếu 'Nghị định 06/2021'")
+
+    # 2) Cấu trúc đặc trưng theo tiêu đề mục
+    headings = [it for it in items if is_heading_candidate(it)]
+    if report_type == 'hoan_thanh':
+        for it in headings:
+            b = strip_leading_number(it['text'])
+            if (re.search(r'(phòng cháy|PCCC)', b, re.IGNORECASE) and
+                    re.search(r'thẩm định|phê duyệt|thẩm duyệt|thiết kế', b, re.IGNORECASE) and
+                    not re.search(r'môi trường', b, re.IGNORECASE)):
+                score['nd207'] += 4
+                signals.append("Có mục RIÊNG về thi công theo thiết kế PCCC được thẩm duyệt (đặc trưng NĐ207)")
+                break
+        if any(heading_ordinal(it) == 13 for it in headings):
+            score['nd207'] += 3; signals.append("Có mục số 13 (NĐ207 hoàn thành = 13 mục)")
+        for it in headings:
+            b = strip_leading_number(it['text'])
+            if re.search(r'môi trường', b, re.IGNORECASE) and re.search(r'phòng cháy|PCCC', b, re.IGNORECASE):
+                score['nd06'] += 3
+                signals.append("Có mục GỘP 'môi trường + PCCC' (đặc trưng NĐ06)")
+                break
+    else:  # dinh_ky
+        if any(heading_ordinal(it) == 9 for it in headings):
+            score['nd207'] += 3; signals.append("Có mục số 9 (NĐ207 định kỳ = 9 mục)")
+        for it in headings:
+            b = strip_leading_number(it['text'])
+            if re.search(r'(kết quả thí nghiệm|quan trắc|kiểm định).{0,70}(so với|yêu cầu).{0,15}thiết kế'
+                         r'|so với yêu cầu thiết kế', b, re.IGNORECASE):
+                score['nd207'] += 3
+                signals.append("Có mục đối chiếu kết quả thí nghiệm với thiết kế (đặc trưng NĐ207)")
+                break
+
+    if score['nd207'] == 0 and score['nd06'] == 0:
+        return 'nd06', 0, signals + [
+            'Không có dấu hiệu rõ ràng — MẶC ĐỊNH NĐ 06/2021 (mẫu cũ còn phổ biến trong giai đoạn '
+            'chuyển tiếp). Nếu là mẫu NĐ 207/2026, hãy chọn/ép thủ công.']
+    if score['nd207'] > score['nd06']:
+        return 'nd207', score['nd207'] - score['nd06'], signals
+    if score['nd06'] > score['nd207']:
+        return 'nd06', score['nd06'] - score['nd207'], signals
+    return 'nd06', 0, signals + ['Hai nghị định ngang điểm — mặc định NĐ 06/2021, kiểm tra lại thủ công.']
+
+
 # ------------------------------------------------------------ main parsing ---
 
 def find_body_start(items):
@@ -401,10 +521,8 @@ def find_body_start(items):
     return start
 
 
-def parse(items, report_type):
-    kw_map = KW_HOAN_THANH if report_type == 'hoan_thanh' else KW_DINH_KY
-    priority = KW_PRIORITY[report_type]
-    max_muc = 12 if report_type == 'hoan_thanh' else 8
+def parse(items, report_type, decree='nd06'):
+    kw_map, priority, max_muc = kw_for(report_type, decree)
 
     body_start = find_body_start(items)
     sections = {'trang_bia': [], 'mo_dau': []}
@@ -452,9 +570,10 @@ def parse(items, report_type):
                 sections.setdefault(current, []).append(t)
                 continue
             if RE_KET_LUAN.match(stripped):
-                current = 'muc_8' if (report_type == 'dinh_ky') else 'ket_luan'
+                # với báo cáo định kỳ, "Kết luận" thực chất là mục cuối (đề xuất/kiến nghị)
+                current = f'muc_{max_muc}' if (report_type == 'dinh_ky') else 'ket_luan'
                 sections.setdefault(current, []).append(t)
-                last_muc = 8 if report_type == 'dinh_ky' else last_muc
+                last_muc = max_muc if report_type == 'dinh_ky' else last_muc
                 continue
             ofmt, ordn = ordinal_format(it)
             if fmt_seen and ofmt and ofmt not in fmt_seen:
@@ -531,6 +650,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('path')
     ap.add_argument('--type', choices=['dinh_ky', 'hoan_thanh'], help='Ép loại báo cáo')
+    ap.add_argument('--nghidinh', choices=['nd06', 'nd207'],
+                    help='Ép nghị định: nd06 (06/2021) hoặc nd207 (207/2026)')
     ap.add_argument('--output-json', action='store_true')
     ap.add_argument('--output-file')
     args = ap.parse_args()
@@ -544,13 +665,17 @@ def main():
         rtype = 'hoan_thanh'
         signals.append('KHÔNG chắc chắn loại báo cáo — mặc định hoan_thanh, hãy kiểm tra lại hoặc dùng --type')
 
-    sections, meta = parse(items, rtype)
+    decree, dconf, dsignals = detect_decree(items, rtype, args.nghidinh)
+    sections, meta = parse(items, rtype, decree)
     output = {
         '_meta': {
             'source_file': os.path.basename(args.path),
             'loai_bao_cao': rtype,
+            'nghi_dinh': decree,
             'do_tin_cay': conf,
+            'do_tin_cay_nghi_dinh': dconf,
             'dau_hieu_nhan_dien': signals,
+            'dau_hieu_nghi_dinh': dsignals,
             **meta,
         },
         **sections,
@@ -564,9 +689,15 @@ def main():
         print(js)
     if not args.output_json and not args.output_file or args.output_file:
         m = output['_meta']
+        nd_label = 'NĐ 207/2026' if decree == 'nd207' else 'NĐ 06/2021'
+        so_muc = m['so_muc_chuan']
         print(f"File: {m['source_file']}")
-        print(f"Loại báo cáo: {'ĐỊNH KỲ (8 mục - PL IVa)' if rtype=='dinh_ky' else 'HOÀN THÀNH (12 mục - PL IVb)'} (độ tin cậy: {conf})")
+        print(f"Loại báo cáo: {'ĐỊNH KỲ' if rtype=='dinh_ky' else 'HOÀN THÀNH'} — {nd_label} "
+              f"({so_muc} mục, PL IV{'a' if rtype=='dinh_ky' else 'b'}) "
+              f"[tin cậy loại: {conf}, tin cậy nghị định: {dconf}]")
         for s in m['dau_hieu_nhan_dien']: print(f'  • {s}')
+        print(f"Nghị định áp dụng: {nd_label}")
+        for s in m['dau_hieu_nghi_dinh']: print(f'  • {s}')
         print(f"Trang bìa/lót: {'CÓ — đã tách riêng' if m['trang_bia_detected'] else 'không phát hiện'}")
         print(f"Mục tìm thấy: {len(m['sections_found'])}/{m['so_muc_chuan']}")
         if m['sections_missing']: print(f"  THIẾU: {', '.join(m['sections_missing'])}")
