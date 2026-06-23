@@ -471,8 +471,14 @@ def detect_decree(items, report_type, forced=None):
                 score['nd207'] += 4
                 signals.append("Có mục RIÊNG về thi công theo thiết kế PCCC được thẩm duyệt (đặc trưng NĐ207)")
                 break
-        if any(heading_ordinal(it) == 13 for it in headings):
-            score['nd207'] += 3; signals.append("Có mục số 13 (NĐ207 hoàn thành = 13 mục)")
+        # Loại trừ heading phụ lục/hình ảnh có số 13 — không phải mục nội dung
+        for it in headings:
+            if heading_ordinal(it) == 13:
+                b = strip_leading_number(it['text'])
+                if not re.search(r'phụ\s*lục|hình\s*ảnh', b, re.IGNORECASE):
+                    score['nd207'] += 3
+                    signals.append("Có mục số 13 (NĐ207 hoàn thành = 13 mục)")
+                    break
         for it in headings:
             b = strip_leading_number(it['text'])
             if re.search(r'môi trường', b, re.IGNORECASE) and re.search(r'phòng cháy|PCCC', b, re.IGNORECASE):
@@ -480,8 +486,14 @@ def detect_decree(items, report_type, forced=None):
                 signals.append("Có mục GỘP 'môi trường + PCCC' (đặc trưng NĐ06)")
                 break
     else:  # dinh_ky
-        if any(heading_ordinal(it) == 9 for it in headings):
-            score['nd207'] += 3; signals.append("Có mục số 9 (NĐ207 định kỳ = 9 mục)")
+        # Loại trừ "9. Các phụ lục đính kèm" — không phải mục nội dung thứ 9 của NĐ207
+        for it in headings:
+            if heading_ordinal(it) == 9:
+                b = strip_leading_number(it['text'])
+                if not re.search(r'phụ\s*lục', b, re.IGNORECASE):
+                    score['nd207'] += 3
+                    signals.append("Có mục số 9 (NĐ207 định kỳ = 9 mục)")
+                    break
         for it in headings:
             b = strip_leading_number(it['text'])
             if re.search(r'(kết quả thí nghiệm|quan trắc|kiểm định).{0,70}(so với|yêu cầu).{0,15}thiết kế'
@@ -548,6 +560,17 @@ def parse(items, report_type, decree='nd06'):
             continue
 
         if it['kind'] == 'table':
+            # Phát hiện tiêu đề phụ lục nằm trong bảng (vd "PHỤ LỤC I | NĂNG LỰC...")
+            first_line = it['text'].split('\n')[0].strip() if it['text'] else ''
+            if (it['rows'] <= 2 and
+                    re.match(r'^phụ\s*lục\s*([IVX]+|\d{1,2})\b', first_line, re.IGNORECASE)):
+                in_appendix = True
+                key = f'phu_luc_{len(appendices) + 1}'
+                appendices.append({'ten': first_line, 'key': key})
+                current = key
+                sections.setdefault(current, []).append(it['text'])
+                tables_count[current] = tables_count.get(current, 0) + 1
+                continue
             sections.setdefault(current, []).append(f"[BẢNG {it['rows']}x{it['cols']}]\n{it['text']}")
             tables_count[current] = tables_count.get(current, 0) + 1
             continue

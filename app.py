@@ -280,7 +280,10 @@ if use_ai and ai_ready:
 ai_result = st.session_state.get('ai_review')
 using_ai_result = use_ai and ai_ready and ai_result is not None
 review = json.loads(json.dumps(ai_result if using_ai_result else base_review))
-mode_tag = 'ai' if using_ai_result else 'rule'
+# Đưa rtype + decree vào mode_tag để widget key thay đổi khi user đổi nghị định/loại BC.
+# Nếu không làm vậy, Streamlit giữ session state cũ của text_area/selectbox từ lần chạy trước
+# (vd đổi từ nd207 → nd06 mà tom_tat vẫn hiện "9 mục NĐ207" do key 'tt_rule' không đổi).
+mode_tag = ('ai' if using_ai_result else 'rule') + f'_{rtype}_{decree}'
 
 # ---------------- THÔNG TIN NHẬN DIỆN ----------------
 nd_label = 'NĐ 207/2026' if decree == 'nd207' else 'NĐ 06/2021'
