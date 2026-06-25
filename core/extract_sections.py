@@ -576,7 +576,37 @@ def parse(items, report_type, decree='nd06'):
             continue
 
         t = it['text']
-        # --- phụ lục / hình ảnh ---
+
+        # --- TIÊU ĐỀ MỤC CHÍNH? (ưu tiên; CÓ THỂ KHÔI PHỤC nếu đang lỡ vào chế độ phụ lục) ---
+        is_head = is_heading_candidate(it)
+        stripped = strip_leading_number(t) if is_head else t
+        muc_here = None
+        if is_head and not RE_CAN_CU.match(stripped) and not RE_KET_LUAN.match(stripped):
+            ofmt, ordn = ordinal_format(it)
+            if fmt_seen and ofmt and ofmt not in fmt_seen:
+                # kiểu đánh số khác với tiêu đề cấp 1 đã xác lập → là TIÊU ĐỀ CON, không đổi mục
+                muc_here = None
+            else:
+                m_kw = match_keywords(t, kw_map, priority)
+                # khi ĐANG ở phụ lục: chỉ thoát ra nếu đây là mục chính TIẾP THEO (số lớn hơn mục
+                # gần nhất) — tránh bảng phụ lục trùng từ khóa mục cũ làm nhảy lung tung
+                if m_kw is not None and (not in_appendix or m_kw > last_muc):
+                    muc_here = m_kw
+                elif ordn is not None and 1 <= ordn <= max_muc and ordn == last_muc + 1:
+                    muc_here = ordn
+            if muc_here is not None and ofmt:
+                fmt_seen.add(ofmt)
+
+        if muc_here is not None:
+            # Gặp tiêu đề mục chính tiếp theo => nếu đang ở phụ lục thì THOÁT RA. Lý do: nhiều báo cáo
+            # chèn 'Phụ lục I.1: bảng năng lực...' GIỮA thân (minh họa cho mục 2), không phải hết báo cáo.
+            in_appendix = False
+            current = f'muc_{muc_here}'
+            last_muc = max(last_muc, muc_here)
+            sections.setdefault(current, []).append(t)
+            continue
+
+        # --- phụ lục / hình ảnh (chỉ khi KHÔNG phải tiêu đề mục chính) ---
         if it['kind'] == 'p' and len(t) < 150 and (RE_PHU_LUC.match(t.strip()) or
                 (RE_HINH_ANH.search(t) and it['caps'])):
             in_appendix = True
@@ -586,8 +616,8 @@ def parse(items, report_type, decree='nd06'):
             sections.setdefault(current, []).append(t)
             continue
 
-        if not in_appendix and is_heading_candidate(it):
-            stripped = strip_leading_number(t)
+        # --- căn cứ / kết luận ---
+        if not in_appendix and is_head:
             if RE_CAN_CU.match(stripped):
                 current = 'can_cu'
                 sections.setdefault(current, []).append(t)
@@ -597,24 +627,6 @@ def parse(items, report_type, decree='nd06'):
                 current = f'muc_{max_muc}' if (report_type == 'dinh_ky') else 'ket_luan'
                 sections.setdefault(current, []).append(t)
                 last_muc = max_muc if report_type == 'dinh_ky' else last_muc
-                continue
-            ofmt, ordn = ordinal_format(it)
-            if fmt_seen and ofmt and ofmt not in fmt_seen:
-                # kiểu đánh số khác với tiêu đề cấp 1 đã xác lập (vd cấp 1 là I,II,III
-                # mà đây là 1.,2.,3.) → đây là TIÊU ĐỀ CON, không đổi mục
-                muc = None
-            else:
-                muc = match_keywords(t, kw_map, priority)
-                if muc is not None:
-                    if ofmt:
-                        fmt_seen.add(ofmt)
-                elif (ordn is not None and 1 <= ordn <= max_muc and ordn == last_muc + 1):
-                    # fallback theo số thứ tự khi không khớp từ khóa, đúng trình tự
-                    muc = ordn
-            if muc is not None:
-                current = f'muc_{muc}'
-                last_muc = max(last_muc, muc)
-                sections.setdefault(current, []).append(t)
                 continue
 
         sections.setdefault(current, []).append(t)
