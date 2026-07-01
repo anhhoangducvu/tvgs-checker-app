@@ -145,24 +145,27 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
         return out_s
 
     missing_refs_all = set()
+    has_any_apx = bool(apx_by_so)
     for sec_key, nums in refs_per_muc.items():
         for n in nums:
             if n not in apx_by_so:
                 missing_refs_all.add(n)
-                msg = (f"{sec_key.replace('_', ' ')} dẫn chiếu 'Phụ lục {_roman(n)}' nhưng "
-                       "KHÔNG tìm thấy phụ lục này trong file — phải đính kèm hoặc bỏ dẫn chiếu.")
-                add_issue(sec_key, msg, loi=True)
-                findings.append(('LOI', msg))
+                if has_any_apx:
+                    # File CÓ phụ lục nhưng lệch số (rất hay gặp: thân ghi 'Phụ lục VII' mà tiêu đề
+                    # phụ lục lại là 'VI'...). Đây là lỗi ĐÁNH SỐ, không phải thiếu tài liệu => CẦN SỬA.
+                    msg = (f"{sec_key.replace('_', ' ')} dẫn chiếu 'Phụ lục {_roman(n)}' nhưng không thấy "
+                           "phụ lục ĐÚNG SỐ này trong file (các phụ lục khác vẫn có) — kiểm tra lại việc "
+                           "đánh số/khớp tên phụ lục giữa thân và phần đính kèm.")
+                else:
+                    msg = (f"{sec_key.replace('_', ' ')} dẫn chiếu 'Phụ lục {_roman(n)}' nhưng KHÔNG có "
+                           "phụ lục nào trong file — phải đính kèm hoặc bỏ dẫn chiếu.")
+                add_issue(sec_key, msg, loi=False)
+                findings.append(('CAN_SUA', msg))
 
-    # 5) Chữ ký
-    ck = meta.get('chu_ky', {})
-    if not ck.get('giam_sat_truong'):
-        msg = "Thiếu chữ ký GIÁM SÁT TRƯỞNG."
-        findings.append(('LOI', msg))
-    if rtype == 'hoan_thanh' and not ck.get('dai_dien_phap_luat'):
-        msg = ("Báo cáo HOÀN THÀNH theo PL IVb phải có chữ ký NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT "
-               "của tổ chức TVGS (ký, ghi rõ họ tên, chức vụ, đóng dấu) — chưa phát hiện trong file.")
-        findings.append(('CAN_SUA', msg))
+    # 5) Chữ ký — KHÔNG kiểm tra, KHÔNG tính là lỗi/thiếu.
+    #    Lý do: công cụ này để GIÁM SÁT TRƯỞNG rà soát báo cáo TRƯỚC KHI KÝ, nên báo cáo thường
+    #    CHƯA có chữ ký khi kiểm tra — việc thiếu chữ ký ở bước này là bình thường. Thông tin chữ ký
+    #    (nếu đọc được từ text) vẫn hiển thị ở tab 'Chi tiết trích xuất' để tham khảo.
 
     # 6) Văn bản pháp lý hết hiệu lực
     if re.search(r'15/2021/NĐ-CP|Nghị định\s*(số\s*)?15/2021|NĐ\s*15/2021', full_text, re.IGNORECASE):
@@ -261,6 +264,16 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
                             + ' (đã kiểm tra gộp nội dung phụ lục).')
 
         passed, missing = _check_entries(aug_text, sc.get('tu_khoa_bat_buoc', []))
+        if key == 'muc_1':
+            # Công trình HẠ TẦNG KỸ THUẬT không có số tầng/chiều cao/diện tích sàn/bậc chịu lửa
+            # -> KHÔNG tính là thiếu (chỉ nhắc). Tránh đánh trượt oan công trình hạ tầng.
+            soft = [mm for mm in missing if any(w in mm.lower()
+                    for w in ('tầng', 'chiều cao', 'diện tích', 'bậc chịu lửa'))]
+            if soft:
+                missing = [mm for mm in missing if mm not in soft]
+                dat_duoc.append("Không bắt buộc thông số nhà (số tầng/chiều cao/diện tích sàn/bậc chịu "
+                                "lửa) — phù hợp CÔNG TRÌNH HẠ TẦNG KỸ THUẬT. Nếu là công trình dân dụng/"
+                                "công nghiệp thì nên bổ sung các thông số này.")
         tbl_passed, tbl_missing = _check_entries(aug_text, sc.get('bang_bieu_bat_buoc', []))
         total_pass += len(passed) + len(tbl_passed)
         total_miss += len(missing)
@@ -293,13 +306,25 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
         danh_gia_muc.append({'muc': f'Mục {i}', 'ten': ten, 'trang_thai': st,
                              'nhan_xet_ngan': nx, 'dat_duoc': dat_duoc, 'van_de': van_de})
 
+    # 11) ĐÚNG MẪU / ĐÚNG TRÌNH TỰ (phát hiện TRỘN mẫu NĐ06+NĐ207, chèn mục lạ, lệch số mục...)
+    tpl_issues = meta.get('template_issues', []) or []
+    sai_mau = meta.get('template_severity') == 'nghiem_trong'
+    if sai_mau:
+        _extra = f" (và {len(tpl_issues) - 1} vấn đề khác)" if len(tpl_issues) > 1 else ""
+        findings.append(('LOI', "SAI MẪU / KHÔNG ĐÚNG TRÌNH TỰ Phụ lục IV: "
+                         + (tpl_issues[0] if tpl_issues else "")
+                         + _extra + " — báo cáo phải lập theo ĐÚNG MỘT mẫu (NĐ 06/2021 hoặc NĐ 207/2026), "
+                         "đúng thứ tự và số mục; không trộn/chèn mục ngoài mẫu."))
+    elif tpl_issues:
+        findings.append(('CAN_SUA', "Lưu ý trình tự/đánh số mục: " + tpl_issues[0]))
+
     # ============ TỔNG HỢP ============
     n_loi = sum(1 for m in danh_gia_muc if m['trang_thai'] == 'LOI') + \
         sum(1 for sev, _ in findings if sev == 'LOI' and True) - len(loi_flags & set(f'muc_{i}' for i in range(1, max_muc + 1)))
     n_loi = max(n_loi, sum(1 for sev, _ in findings if sev == 'LOI'))
     n_can_sua = sum(1 for m in danh_gia_muc if m['trang_thai'] == 'CAN_SUA')
 
-    if n_thieu >= 3 or n_loi >= 5:
+    if sai_mau or n_thieu >= 3 or n_loi >= 5:
         xep_loai = 'KHÔNG ĐẠT'
     elif n_loi > 0 or n_thieu > 0:
         xep_loai = 'CẦN SỬA'
@@ -328,7 +353,8 @@ def analyze(extracted, criteria, nguoi_danh_gia_ten='', truong_phong_ten='Hoàng
                f"{sum(1 for m in danh_gia_muc if m['trang_thai']=='DAT')} mục đạt, "
                f"{n_can_sua} mục cần sửa, "
                f"{sum(1 for m in danh_gia_muc if m['trang_thai']=='LOI')} mục lỗi, {n_thieu} mục thiếu. "
-               "Kết quả do công cụ quét quy tắc — cần người có chuyên môn xác nhận lại trước khi phát hành.")
+               "Kết quả do công cụ quét quy tắc — cần người có chuyên môn xác nhận lại trước khi phát hành."
+               + (" ⚠️ BÁO CÁO SAI MẪU / KHÔNG ĐÚNG TRÌNH TỰ Phụ lục IV (xem phát hiện chính)." if sai_mau else ""))
     ket_luan = (f"Báo cáo được Phòng Kỹ thuật kiểm tra tự động theo bộ tiêu chí TEXO "
                 f"(xây dựng từ Phụ lục IV {nd_text} và chú thích kiểm tra nội bộ). "
                 f"Xếp loại sơ bộ: {xep_loai}. "

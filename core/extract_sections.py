@@ -344,7 +344,7 @@ RE_HINH_ANH = re.compile(r'(một số )?hình ảnh', re.IGNORECASE)
 RE_NUM_HEAD = re.compile(r'^\s*(\d{1,2})\s*[\.\):/](?!\d)\s*')   # bắt cả dạng "4/ ..."
 RE_ROMAN_HEAD = re.compile(r'^\s*([IVX]{1,4})\s*[\.\):/]\s+')
 RE_MUC_HEAD = re.compile(r'^\s*Mục\s+(\d{1,2})\b', re.IGNORECASE)
-RE_TOC_LINE = re.compile(r'\.{5,}\s*\d*\s*$')   # dòng MỤC LỤC: "..... 12"
+RE_TOC_LINE = re.compile(r'\.{5,}\s*\d*\s*$|(?:[.\u2026\u00b7\u2027\u2219]\s*){4,}')   # dòng MỤC LỤC: dấu chấm ASCII '..... 12' HOẶC ellipsis '…………' (U+2026)
 
 
 def heading_ordinal(item):
@@ -446,71 +446,99 @@ def detect_type(items, forced=None):
 
 
 def detect_decree(items, report_type, forced=None):
-    """Nhận diện NGHỊ ĐỊNH áp dụng: 'nd06' (06/2021) hay 'nd207' (207/2026).
-    Cả hai mẫu dùng song song trong giai đoạn chuyển tiếp nên phải tự đoán."""
+    """Nhận diện NGHỊ ĐỊNH áp dụng: 'nd06' (06/2021) hay 'nd207' (207/2026) — TỰ NHẬN DIỆN theo
+    CẤU TRÚC báo cáo (đa số báo cáo KHÔNG nêu căn cứ nghị định), kèm trích dẫn nếu có.
+
+    Dấu hiệu:
+      - Trích dẫn '207/2026' / '06/2021' (nếu có) — mạnh nhất.
+      - Định kỳ: có mục 'đánh giá phù hợp thí nghiệm SO VỚI THIẾT KẾ' (mục 5 mới) => NĐ207;
+        vị trí mục 'nghiệm thu': số 6 => NĐ207 (đã dịch), số 5 => NĐ06.
+      - Hoàn thành: mục PCCC RIÊNG theo thiết kế thẩm duyệt => NĐ207; mục GỘP 'môi trường + PCCC' => NĐ06.
+    Không có dấu hiệu => mặc định NĐ06. Người dùng luôn có thể ép bằng --nghidinh / dropdown."""
     if forced in ('nd06', 'nd207'):
         return forced, 99, [f'--nghidinh {forced} (do người dùng chỉ định)']
     full = '\n'.join(it['text'] for it in items)
     signals = []
-    score = {'nd207': 0, 'nd06': 0}
+    score = {'nd06': 0, 'nd207': 0}
 
-    # 1) Trích dẫn số nghị định trong căn cứ pháp lý (tín hiệu mạnh nhất)
+    # 1) Trích dẫn số nghị định (nếu có)
     if re.search(r'207\s*/\s*2026', full):
-        score['nd207'] += 6; signals.append("Dẫn chiếu 'Nghị định 207/2026'")
-    if re.search(r'\b06\s*/\s*2021', full):
-        score['nd06'] += 4; signals.append("Dẫn chiếu 'Nghị định 06/2021'")
+        score['nd207'] += 8; signals.append("Trích dẫn 'Nghị định 207/2026'")
+    if re.search(r'\b0?6\s*/\s*2021', full):
+        score['nd06'] += 6; signals.append("Trích dẫn 'Nghị định 06/2021'")
 
-    # 2) Cấu trúc đặc trưng theo tiêu đề mục
+    # 2) Dấu hiệu CẤU TRÚC (thân báo cáo)
     headings = [it for it in items if is_heading_candidate(it)]
-    if report_type == 'hoan_thanh':
+    if report_type == 'dinh_ky':
         for it in headings:
-            b = strip_leading_number(it['text'])
-            if (re.search(r'(phòng cháy|PCCC)', b, re.IGNORECASE) and
-                    re.search(r'thẩm định|phê duyệt|thẩm duyệt|thiết kế', b, re.IGNORECASE) and
-                    not re.search(r'môi trường', b, re.IGNORECASE)):
-                score['nd207'] += 4
-                signals.append("Có mục RIÊNG về thi công theo thiết kế PCCC được thẩm duyệt (đặc trưng NĐ207)")
+            b2 = strip_leading_number(it['text'])
+            if re.search(r'(kết quả thí nghiệm|quan trắc|kiểm định).{0,80}(so với|yêu cầu).{0,15}thiết kế'
+                         r'|so với yêu cầu thiết kế', b2, re.IGNORECASE):
+                score['nd207'] += 3
+                signals.append("Có mục 'đánh giá thí nghiệm/quan trắc SO VỚI THIẾT KẾ' (mục 5 mới của NĐ207)")
                 break
-        # Loại trừ heading phụ lục/hình ảnh có số 13 — không phải mục nội dung
         for it in headings:
-            if heading_ordinal(it) == 13:
-                b = strip_leading_number(it['text'])
-                if not re.search(r'phụ\s*lục|hình\s*ảnh', b, re.IGNORECASE):
-                    score['nd207'] += 3
-                    signals.append("Có mục số 13 (NĐ207 hoàn thành = 13 mục)")
-                    break
+            o = heading_ordinal(it); b2 = strip_leading_number(it['text'])
+            if o in (5, 6) and re.search(r'nghiệm thu', b2, re.IGNORECASE) \
+                    and not re.search(r'điều kiện|hoàn thành', b2, re.IGNORECASE):
+                if o == 6:
+                    score['nd207'] += 2; signals.append("Mục 'nghiệm thu' đánh số 6 (NĐ207 — đã dịch do chèn mục 5)")
+                else:
+                    score['nd06'] += 2; signals.append("Mục 'nghiệm thu' đánh số 5 (đặc trưng NĐ06)")
+                break
+    else:  # hoan_thanh
         for it in headings:
-            b = strip_leading_number(it['text'])
-            if re.search(r'môi trường', b, re.IGNORECASE) and re.search(r'phòng cháy|PCCC', b, re.IGNORECASE):
+            b2 = strip_leading_number(it['text'])
+            if (re.search(r'(phòng cháy|PCCC)', b2, re.IGNORECASE) and
+                    re.search(r'thẩm định|phê duyệt|thẩm duyệt', b2, re.IGNORECASE) and
+                    not re.search(r'môi trường', b2, re.IGNORECASE)):
+                score['nd207'] += 3
+                signals.append("Có mục RIÊNG về PCCC theo thiết kế thẩm duyệt (đặc trưng NĐ207)")
+                break
+        for it in headings:
+            b2 = strip_leading_number(it['text'])
+            if re.search(r'môi trường', b2, re.IGNORECASE) and re.search(r'phòng cháy|PCCC', b2, re.IGNORECASE):
                 score['nd06'] += 3
                 signals.append("Có mục GỘP 'môi trường + PCCC' (đặc trưng NĐ06)")
-                break
-    else:  # dinh_ky
-        # Loại trừ "9. Các phụ lục đính kèm" — không phải mục nội dung thứ 9 của NĐ207
-        for it in headings:
-            if heading_ordinal(it) == 9:
-                b = strip_leading_number(it['text'])
-                if not re.search(r'phụ\s*lục', b, re.IGNORECASE):
-                    score['nd207'] += 3
-                    signals.append("Có mục số 9 (NĐ207 định kỳ = 9 mục)")
-                    break
-        for it in headings:
-            b = strip_leading_number(it['text'])
-            if re.search(r'(kết quả thí nghiệm|quan trắc|kiểm định).{0,70}(so với|yêu cầu).{0,15}thiết kế'
-                         r'|so với yêu cầu thiết kế', b, re.IGNORECASE):
-                score['nd207'] += 3
-                signals.append("Có mục đối chiếu kết quả thí nghiệm với thiết kế (đặc trưng NĐ207)")
                 break
 
     if score['nd207'] == 0 and score['nd06'] == 0:
         return 'nd06', 0, signals + [
-            'Không có dấu hiệu rõ ràng — MẶC ĐỊNH NĐ 06/2021 (mẫu cũ còn phổ biến trong giai đoạn '
-            'chuyển tiếp). Nếu là mẫu NĐ 207/2026, hãy chọn/ép thủ công.']
+            "Không thấy dấu hiệu rõ — MẶC ĐỊNH NĐ 06/2021. Ép 'NĐ 207/2026' nếu báo cáo lập theo mẫu mới."]
     if score['nd207'] > score['nd06']:
         return 'nd207', score['nd207'] - score['nd06'], signals
     if score['nd06'] > score['nd207']:
         return 'nd06', score['nd06'] - score['nd207'], signals
-    return 'nd06', 0, signals + ['Hai nghị định ngang điểm — mặc định NĐ 06/2021, kiểm tra lại thủ công.']
+    return 'nd06', 0, signals + ["Ngang điểm — mặc định NĐ 06/2021, kiểm tra lại thủ công."]
+
+
+def assess_template(body_headings, report_type, max_muc):
+    """Kiểm tra báo cáo có ĐÚNG MẪU / ĐÚNG TRÌNH TỰ Phụ lục IV không.
+    body_headings: [{ordinal, kw_muc, text}] — các tiêu đề CÓ ĐÁNH SỐ ở thân.
+    Trả (issues[list], severity: 'nghiem_trong'|'nhe'|None)."""
+    issues = []
+    extra = 0        # tiêu đề đánh số nhưng KHÔNG thuộc mẫu chuẩn (mục lạ chèn thêm)
+    misnum = 0       # nội dung khớp 1 mục chuẩn nhưng đánh SỐ khác vị trí chuẩn
+    over = 0
+    for h in body_headings:
+        o = h.get('ordinal'); kw = h.get('kw_muc'); txt = (h.get('text') or '').strip()
+        if o is None:
+            continue
+        phuluc_like = bool(re.search(r'phụ\s*lục|hình\s*ảnh', txt, re.IGNORECASE))
+        if kw is None:
+            if not phuluc_like:
+                extra += 1
+                issues.append(f'Mục đánh số {o} ("{txt}") KHÔNG thuộc mẫu Phụ lục IV — mục CHÈN THÊM / không đúng trình tự.')
+        else:
+            if o != kw:
+                misnum += 1
+                issues.append(f'Nội dung tương ứng Mục {kw} của mẫu nhưng bị ĐÁNH SỐ {o} — lệch số / sai trình tự mục.')
+            if o > max_muc:
+                over += 1
+    if over:
+        issues.append(f'Có mục đánh số vượt quá {max_muc} mục của mẫu chuẩn — thừa mục / không đúng mẫu.')
+    severity = 'nghiem_trong' if (extra >= 1 or misnum >= 1) else None
+    return issues, severity
 
 
 # ------------------------------------------------------------ main parsing ---
@@ -540,6 +568,7 @@ def parse(items, report_type, decree='nd06'):
     sections = {'trang_bia': [], 'mo_dau': []}
     tables_count = {}
     appendices = []      # [{ten, key}]
+    body_headings = []   # tiêu đề CÓ đánh số ở thân (kiểm tra đúng mẫu/trình tự)
     current = 'mo_dau'
     in_appendix = False
     last_muc = 0
@@ -583,19 +612,20 @@ def parse(items, report_type, decree='nd06'):
         muc_here = None
         if is_head and not RE_CAN_CU.match(stripped) and not RE_KET_LUAN.match(stripped):
             ofmt, ordn = ordinal_format(it)
+            m_kw = match_keywords(t, kw_map, priority)
             if fmt_seen and ofmt and ofmt not in fmt_seen:
                 # kiểu đánh số khác với tiêu đề cấp 1 đã xác lập → là TIÊU ĐỀ CON, không đổi mục
                 muc_here = None
-            else:
-                m_kw = match_keywords(t, kw_map, priority)
-                # khi ĐANG ở phụ lục: chỉ thoát ra nếu đây là mục chính TIẾP THEO (số lớn hơn mục
-                # gần nhất) — tránh bảng phụ lục trùng từ khóa mục cũ làm nhảy lung tung
-                if m_kw is not None and (not in_appendix or m_kw > last_muc):
-                    muc_here = m_kw
-                elif ordn is not None and 1 <= ordn <= max_muc and ordn == last_muc + 1:
-                    muc_here = ordn
+            elif m_kw is not None and (not in_appendix or m_kw > last_muc):
+                # khi ĐANG ở phụ lục: chỉ thoát ra nếu đây là mục chính TIẾP THEO (số lớn hơn mục gần nhất)
+                muc_here = m_kw
+            elif ordn is not None and 1 <= ordn <= max_muc and ordn == last_muc + 1:
+                muc_here = ordn
             if muc_here is not None and ofmt:
                 fmt_seen.add(ofmt)
+            # Ghi nhận TIÊU ĐỀ CÓ ĐÁNH SỐ ở thân (phục vụ kiểm tra ĐÚNG MẪU / ĐÚNG TRÌNH TỰ)
+            if ordn is not None and not in_appendix and not RE_PHU_LUC.match(stripped):
+                body_headings.append({'ordinal': ordn, 'kw_muc': m_kw, 'text': stripped[:70]})
 
         if muc_here is not None:
             # Gặp tiêu đề mục chính tiếp theo => nếu đang ở phụ lục thì THOÁT RA. Lý do: nhiều báo cáo
@@ -667,10 +697,15 @@ def parse(items, report_type, decree='nd06'):
         if nums:
             refs_per_muc[k] = nums
 
+    template_issues, template_severity = assess_template(body_headings, report_type, max_muc)
+
     meta = {
         'sections_found': found,
         'sections_missing': missing,
         'so_muc_chuan': max_muc,
+        'body_headings': body_headings,
+        'template_issues': template_issues,
+        'template_severity': template_severity,
         'tables_per_section': tables_count,
         'trang_bia_detected': bool(out.get('trang_bia')),
         'phu_luc_found': appendices,
