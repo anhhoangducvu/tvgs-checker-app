@@ -348,9 +348,20 @@ RE_TOC_LINE = re.compile(r'\.{5,}\s*\d*\s*$|(?:[.\u2026\u00b7\u2027\u2219]\s*){4
 
 
 def heading_ordinal(item):
-    """Trả về số thứ tự mục nếu paragraph trông như tiêu đề mục cấp 1, else None."""
+    """Trả về số thứ tự mục nếu paragraph trông như tiêu đề mục cấp 1, else None.
+
+    LƯU Ý ĐỘ DÀI: RE_MUC_HEAD/RE_NUM_HEAD/RE_ROMAN_HEAD chỉ khớp SỐ Ở ĐẦU DÒNG (anchor ^),
+    nên độ dài phần còn lại của đoạn văn KHÔNG ảnh hưởng tới độ chính xác của việc khớp số —
+    không được dùng độ dài để loại các tiêu đề này. Nhiều báo cáo chép nguyên văn mô tả mục
+    dài từ Phụ lục IV (điển hình mục 10 PCCC của NĐ207, liệt kê đủ 6 đầu mục ngay trong câu
+    tiêu đề, >400 ký tự) — nếu giới hạn độ dài ở đây, các tiêu đề kiểu này sẽ bị bỏ sót và toàn
+    bộ nội dung mục bị nuốt vào mục trước đó (đã xảy ra thực tế, xem CLAUDE.md 2026-08-10).
+    An toàn trước khả năng khớp nhầm số thứ tự trong câu văn dài đã được đảm bảo ở tầng gọi
+    (parse(): chỉ chấp nhận khi ordn == last_muc + 1, hoặc khớp từ khóa mục).
+    Độ dài chỉ còn ý nghĩa lọc nhiễu cho heuristic YẾU hơn — tiêu đề IN HOA không đánh số
+    (xem is_heading_candidate)."""
     t = item['text']
-    if len(t) > 220 or RE_TOC_LINE.search(t):
+    if RE_TOC_LINE.search(t):
         return None
     if item['label'] and item.get('ilvl') == 0:
         lm = re.match(r'^([IVX]{1,4})[\.\)]?$', item['label'].strip())
@@ -402,12 +413,16 @@ def match_keywords(text, kw_map, priority):
 
 def is_heading_candidate(item):
     t = item['text']
-    if item['kind'] != 'p' or not t or len(t) > 220:
+    if item['kind'] != 'p' or not t:
         return False
     if RE_TOC_LINE.search(t):   # dòng mục lục không phải tiêu đề thật
         return False
+    # Tiêu đề có SỐ THỨ TỰ ở đầu (numPr hoặc số gõ tay "10.") — tin cậy dù văn bản dài
+    # (xem giải thích độ dài trong heading_ordinal).
     if heading_ordinal(item) is not None:
         return True
+    # Heuristic YẾU hơn (không đánh số, chỉ dựa vào chữ IN HOA) — vẫn cần giới hạn độ dài
+    # để tránh nhận nhầm cả đoạn văn IN HOA dài thành tiêu đề.
     if item['caps'] and len(t) < 150:
         return True
     return False
@@ -445,12 +460,31 @@ def detect_type(items, forced=None):
     return typ, abs(score['hoan_thanh'] - score['dinh_ky']), signals
 
 
+def _max_consecutive_ordinal(items):
+    """Số thứ tự mục CAO NHẤT mà báo cáo đánh số LIÊN TỤC từ 1 (1,2,3,...,n) ở thân bài — tín hiệu
+    cấu trúc không phụ thuộc từ khóa/nghị định. Bỏ qua tiêu đề đánh số LỆCH thứ tự mong đợi (nhiều
+    khả năng là số liệt kê trong nội dung, không phải tiêu đề mục), nên an toàn trước khớp nhầm.
+    VD: hoàn thành mà đánh số liên tục tới 13 → CHỈ có thể là NĐ207 (NĐ06 hoàn thành chỉ có 12 mục)."""
+    last = 0
+    for it in items:
+        if not is_heading_candidate(it):
+            continue
+        o = heading_ordinal(it)
+        if o == last + 1:
+            last = o
+    return last
+
+
 def detect_decree(items, report_type, forced=None):
     """Nhận diện NGHỊ ĐỊNH áp dụng: 'nd06' (06/2021) hay 'nd207' (207/2026) — TỰ NHẬN DIỆN theo
     CẤU TRÚC báo cáo (đa số báo cáo KHÔNG nêu căn cứ nghị định), kèm trích dẫn nếu có.
 
     Dấu hiệu:
-      - Trích dẫn '207/2026' / '06/2021' (nếu có) — mạnh nhất.
+      - Đánh số mục LIÊN TỤC vượt quá số mục chuẩn của NĐ06 (12 mục hoàn thành / 8 mục định kỳ)
+        — BẰNG CHỨNG CẤU TRÚC gần như chắc chắn là NĐ207, vì NĐ06 không có mục số đó. Tín hiệu
+        này ĐÁNG TIN CẬY HƠN trích dẫn văn bản, vì nhiều đơn vị lập báo cáo theo mẫu mới nhưng lại
+        COPY nguyên phần "căn cứ pháp lý" cũ (vẫn dẫn NĐ 06/2021) — xem CLAUDE.md 2026-08-10 (b).
+      - Trích dẫn '207/2026' / '06/2021' (nếu có) — mạnh, nhưng có thể lỗi thời (xem trên).
       - Định kỳ: có mục 'đánh giá phù hợp thí nghiệm SO VỚI THIẾT KẾ' (mục 5 mới) => NĐ207;
         vị trí mục 'nghiệm thu': số 6 => NĐ207 (đã dịch), số 5 => NĐ06.
       - Hoàn thành: mục PCCC RIÊNG theo thiết kế thẩm duyệt => NĐ207; mục GỘP 'môi trường + PCCC' => NĐ06.
@@ -461,13 +495,27 @@ def detect_decree(items, report_type, forced=None):
     signals = []
     score = {'nd06': 0, 'nd207': 0}
 
-    # 1) Trích dẫn số nghị định (nếu có)
+    # 1) Đánh số mục LIÊN TỤC — tín hiệu cấu trúc CỨNG, ưu tiên cao nhất (xem docstring).
+    # NGƯỠNG max_ord06 + 2 (chứ không phải +1): rất nhiều báo cáo (cả NĐ06 lẫn NĐ207) đánh số
+    # LUÔN CẢ mục 'Kết luận và kiến nghị' cuối cùng nối tiếp — vậy NĐ06 (12/8 mục) + kết luận số
+    # riêng có thể chạm tới 13/9 dù vẫn là NĐ06 thật. CHỈ khi chạm tới max_ord06+2 (14/10) trở lên
+    # mới chắc chắn KHÔNG THỂ giải thích bằng NĐ06 + 1 mục kết luận, mới coi là bằng chứng NĐ207.
+    max_ord06 = 12 if report_type == 'hoan_thanh' else 8
+    max_seq = _max_consecutive_ordinal(items)
+    if max_seq >= max_ord06 + 2:
+        score['nd207'] += 10
+        signals.append(f"Thân bài đánh số mục LIÊN TỤC tới {max_seq} — vượt quá cả "
+                        f"{max_ord06} mục của NĐ06 ({'hoàn thành' if report_type == 'hoan_thanh' else 'định kỳ'}) "
+                        "CỘNG THÊM 1 mục kết luận/kiến nghị, chỉ có thể là NĐ207 (bất kể phần căn cứ "
+                        "pháp lý dẫn nghị định nào)")
+
+    # 2) Trích dẫn số nghị định (nếu có)
     if re.search(r'207\s*/\s*2026', full):
         score['nd207'] += 8; signals.append("Trích dẫn 'Nghị định 207/2026'")
     if re.search(r'\b0?6\s*/\s*2021', full):
         score['nd06'] += 6; signals.append("Trích dẫn 'Nghị định 06/2021'")
 
-    # 2) Dấu hiệu CẤU TRÚC (thân báo cáo)
+    # 3) Dấu hiệu CẤU TRÚC khác (thân báo cáo)
     headings = [it for it in items if is_heading_candidate(it)]
     if report_type == 'dinh_ky':
         for it in headings:
@@ -515,10 +563,18 @@ def detect_decree(items, report_type, forced=None):
 def assess_template(body_headings, report_type, max_muc):
     """Kiểm tra báo cáo có ĐÚNG MẪU / ĐÚNG TRÌNH TỰ Phụ lục IV không.
     body_headings: [{ordinal, kw_muc, text}] — các tiêu đề CÓ ĐÁNH SỐ ở thân.
-    Trả (issues[list], severity: 'nghiem_trong'|'nhe'|None)."""
+    Trả (issues[list], severity: 'nghiem_trong'|'nhe'|None).
+
+    Phân biệt mức độ nghiêm trọng của mục 'lạ' (kw=None, không khớp mẫu chuẩn):
+      - Nếu mục lạ nằm SAU khi đã đánh đủ max_muc (o > max_muc, vd mục 14 'Đề xuất, kiến nghị'
+        thêm SAU mục 13 cuối cùng của mẫu) → chỉ là PHẦN THÊM cuối báo cáo, khá phổ biến và
+        không làm sai lệch nội dung 13/12 mục chuẩn → mức NHẸ (nhắc, không đánh trượt).
+      - Nếu mục lạ CHEN GIỮA (o <= max_muc, làm gián đoạn trình tự mục chuẩn) hoặc có mục bị
+        ĐÁNH SỐ SAI VỊ TRÍ (misnum) → dấu hiệu TRỘN MẪU/sai trình tự thật sự → mức NGHIÊM TRỌNG."""
     issues = []
-    extra = 0        # tiêu đề đánh số nhưng KHÔNG thuộc mẫu chuẩn (mục lạ chèn thêm)
-    misnum = 0       # nội dung khớp 1 mục chuẩn nhưng đánh SỐ khác vị trí chuẩn
+    extra_mid = 0    # tiêu đề lạ CHEN GIỮA trình tự mục chuẩn (nghiêm trọng)
+    extra_after = 0  # tiêu đề lạ THÊM SAU khi đã đủ mục chuẩn (nhẹ, vd 'Đề xuất, kiến nghị')
+    misnum_offsets = []   # (kw, o) — nội dung khớp 1 mục chuẩn nhưng đánh SỐ khác vị trí chuẩn
     over = 0
     for h in body_headings:
         o = h.get('ordinal'); kw = h.get('kw_muc'); txt = (h.get('text') or '').strip()
@@ -527,17 +583,42 @@ def assess_template(body_headings, report_type, max_muc):
         phuluc_like = bool(re.search(r'phụ\s*lục|hình\s*ảnh', txt, re.IGNORECASE))
         if kw is None:
             if not phuluc_like:
-                extra += 1
-                issues.append(f'Mục đánh số {o} ("{txt}") KHÔNG thuộc mẫu Phụ lục IV — mục CHÈN THÊM / không đúng trình tự.')
+                if o > max_muc:
+                    extra_after += 1
+                    issues.append(f'Mục đánh số {o} ("{txt}") KHÔNG thuộc mẫu Phụ lục IV — có vẻ là '
+                                   'phần thêm SAU khi đã đủ mục chuẩn (vd đề xuất/kiến nghị bổ sung), '
+                                   'không bắt buộc nhưng nên tách rõ, không đánh số nối tiếp mục chuẩn.')
+                else:
+                    extra_mid += 1
+                    issues.append(f'Mục đánh số {o} ("{txt}") KHÔNG thuộc mẫu Phụ lục IV — mục CHÈN THÊM / không đúng trình tự.')
         else:
             if o != kw:
-                misnum += 1
+                misnum_offsets.append(o - kw)
                 issues.append(f'Nội dung tương ứng Mục {kw} của mẫu nhưng bị ĐÁNH SỐ {o} — lệch số / sai trình tự mục.')
             if o > max_muc:
                 over += 1
     if over:
         issues.append(f'Có mục đánh số vượt quá {max_muc} mục của mẫu chuẩn — thừa mục / không đúng mẫu.')
-    severity = 'nghiem_trong' if (extra >= 1 or misnum >= 1) else None
+
+    # LỆCH SỐ ĐỀU (constant offset): nếu MỌI mục lệch số đều lệch CÙNG một khoảng cố định (vd tất cả
+    # +1) — đây là dấu hiệu tác giả đánh số một mục KHÔNG THUỘC mẫu (thường gặp nhất: đánh số luôn cả
+    # phần 'Căn cứ' bằng số La Mã I. ở đầu) VÀO CHUNG dãy số với các mục chuẩn, khiến cả dãy bị dịch
+    # đều một khoảng — nội dung và TRÌNH TỰ các mục vẫn ĐÚNG, chỉ lệch số hiển thị. Khác hẳn trường hợp
+    # lệch số KHÔNG ĐỀU (mỗi mục lệch khác nhau) — đó mới là dấu hiệu THẬT của trộn mẫu/đảo trình tự.
+    misnum = len(misnum_offsets)
+    misnum_severe = misnum >= 1 and len(set(misnum_offsets)) > 1
+    if misnum >= 1 and not misnum_severe:
+        issues.append(f'Toàn bộ {misnum} mục lệch số nói trên lệch ĐỀU cùng {misnum_offsets[0]:+d} — '
+                       'nhiều khả năng do đánh số một mục ngoài mẫu (vd "Căn cứ") chung dãy số La Mã/'
+                       'Ả Rập với các mục chuẩn, làm dịch đều cả dãy; NỘI DUNG và TRÌNH TỰ các mục vẫn '
+                       'đúng. Chỉ là lỗi hình thức đánh số, không phải trộn mẫu — nên sửa lại cách đánh '
+                       'số cho khớp mẫu nhưng không cần đánh trượt báo cáo.')
+    if extra_mid >= 1 or misnum_severe:
+        severity = 'nghiem_trong'
+    elif extra_after >= 1:
+        severity = 'nhe'
+    else:
+        severity = None
     return issues, severity
 
 
@@ -623,9 +704,23 @@ def parse(items, report_type, decree='nd06'):
                 muc_here = ordn
             if muc_here is not None and ofmt:
                 fmt_seen.add(ofmt)
-            # Ghi nhận TIÊU ĐỀ CÓ ĐÁNH SỐ ở thân (phục vụ kiểm tra ĐÚNG MẪU / ĐÚNG TRÌNH TỰ)
-            if ordn is not None and not in_appendix and not RE_PHU_LUC.match(stripped):
-                body_headings.append({'ordinal': ordn, 'kw_muc': m_kw, 'text': stripped[:70]})
+            # Ghi nhận TIÊU ĐỀ CÓ ĐÁNH SỐ ở thân (phục vụ kiểm tra ĐÚNG MẪU / ĐÚNG TRÌNH TỰ).
+            # CHỈ ghi nhận 2 trường hợp:
+            #  (a) tiêu đề THỰC SỰ được công nhận là một mục (muc_here có giá trị) — dùng muc_here
+            #      (kết quả đã giải quyết, từ khớp từ khóa HOẶC suy theo trình tự số liên tục) thay
+            #      vì m_kw thô, vì nhiều báo cáo diễn đạt tiêu đề mục khác chút so với từ khóa mẫu
+            #      (m_kw=None) nhưng VẪN được parse() chấp nhận đúng vị trí qua trình tự liên tục.
+            #  (b) tiêu đề NỐI TIẾP ngay sau mục cuối cùng nhưng VƯỢT max_muc — phần thêm cuối báo
+            #      cáo (vd 'Đề xuất, kiến nghị' đánh số 14 sau khi đã đủ 13 mục NĐ207, hoặc 'Kết
+            #      luận và kiến nghị' đánh số La Mã XIII sau 12 mục NĐ06) — vẫn ghi nhận (kw_muc=None)
+            #      để assess_template nêu thành lưu ý NHẸ, không phải mục CHÈN GIỮA.
+            # Các tiêu đề đánh số RỜI RẠC không nối tiếp trình tự (vd danh sách liệt kê lại 1,2,3...
+            # bên trong nội dung một mục) bị loại — chúng không phải tiêu đề mục thật.
+            is_trailing_extra = (muc_here is None and ordn is not None
+                                  and ordn == last_muc + 1 and ordn > max_muc)
+            if ordn is not None and not in_appendix and not RE_PHU_LUC.match(stripped) \
+                    and (muc_here is not None or is_trailing_extra):
+                body_headings.append({'ordinal': ordn, 'kw_muc': muc_here, 'text': stripped[:70]})
 
         if muc_here is not None:
             # Gặp tiêu đề mục chính tiếp theo => nếu đang ở phụ lục thì THOÁT RA. Lý do: nhiều báo cáo

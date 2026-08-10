@@ -149,12 +149,6 @@
         "mo_ta": "Đánh giá so với quy chuẩn/tiêu chuẩn"
       }
     ],
-    "bang_bieu_bat_buoc": [
-      {
-        "ten": "Bảng nhà thầu thi công",
-        "pattern": "(STT|TT).{0,80}[Nn]hà thầu"
-      }
-    ],
     "cau_hoi_tu_duy": [
       "Mục 1a có đủ: số tầng hầm/nổi, chiều cao, diện tích, công năng, bậc chịu lửa không?",
       "Có nêu rõ công trình CÓ hay KHÔNG có GPXD (số, ngày) hoặc thuộc diện miễn phép không?",
